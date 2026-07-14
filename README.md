@@ -13,12 +13,22 @@ Live at **https://greenteakitkats.github.io/lofidoro/**
   interval lengths — drift-free even if you background the tab through a
   whole session.
 - A living SVG room: lamp, candle, and cat react to focus/break/idle;
-  the window sky follows the real time of day.
-- Ambient sound mixer — rain, fireplace, café murmur, night crickets —
-  synthesized entirely in the browser (no audio files, no licensing).
+  the window sky follows the real time of day; and the room quietly
+  evolves as your day's sessions add up — the plant grows, the candle
+  burns down, a notebook fills with ink, the light mellows toward
+  golden hour, and the cat finds new sleeping spots. (Resets each
+  morning at 4am. Preview stages with `?sessions=N`.)
+- Seven window views — hills, city, mountains, ocean, forest, aurora,
+  space — same cozy room, new scenery whenever you want.
+- Built-in lo-fi radio plus a 10-layer ambient mixer (rain, fireplace,
+  café, typing, birds, waves, stream, crickets, thunder, wind), all
+  synthesized entirely in the browser: no audio files, no licensing, no
+  login needed. Thunder occasionally flashes the window; rain streaks
+  it.
 - Spotify: connect your account, browse curated lo-fi playlists or your
   own, and control playback. Auto-pause or duck the music on breaks.
-- Everything (settings, mix, last playlist) is saved locally. No
+  Entirely optional — the room stands on its own.
+- Everything (settings, mix, view, progress) is saved locally. No
   accounts, no backend, no tracking.
 
 ## Spotify setup

@@ -9,9 +9,11 @@ export function Cat() {
 
   return (
     <g>
-      {/* rug */}
+      {/* patterned rug */}
       <ellipse cx="330" cy="446" rx="98" ry="20" fill="#7a5a6a" />
-      <ellipse cx="330" cy="446" rx="78" ry="15" fill="#8d6a7c" />
+      <ellipse cx="330" cy="446" rx="84" ry="16.5" fill="none" stroke="#947184" strokeWidth="2" strokeDasharray="7 6" />
+      <ellipse cx="330" cy="446" rx="70" ry="13" fill="#8d6a7c" />
+      <ellipse cx="330" cy="446" rx="52" ry="9.5" fill="none" stroke="#a17e92" strokeWidth="1.6" strokeDasharray="5 5" />
 
       {/* awake: sitting upright, tail swaying */}
       <g className="cat-awake">

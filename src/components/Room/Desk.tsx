@@ -7,8 +7,15 @@ export function Desk() {
       {/* desk top + legs */}
       <rect x="420" y="318" width="290" height="14" rx="5" fill="#6b4f3f" />
       <rect x="420" y="318" width="290" height="5" rx="2.5" fill="#7d5d4a" />
+      {/* wood grain */}
+      <g stroke="#5f4535" strokeWidth="1" opacity="0.6" strokeLinecap="round">
+        <line x1="452" y1="327" x2="540" y2="327" />
+        <line x1="580" y1="329" x2="668" y2="329" />
+      </g>
       <rect x="436" y="332" width="11" height="86" rx="3" fill="#5a4234" />
       <rect x="684" y="332" width="11" height="86" rx="3" fill="#5a4234" />
+      {/* cross rail with a hanging mug hook, for a handmade feel */}
+      <rect x="447" y="392" width="237" height="7" rx="3" fill="#5a4234" opacity="0.9" />
 
       {/* radio (equalizer bars animate while music plays) */}
       <g>
