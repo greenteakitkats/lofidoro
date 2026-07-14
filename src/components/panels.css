@@ -58,6 +58,13 @@
   color: var(--text-dim);
 }
 
+.chip-view {
+  flex-direction: row;
+  gap: 6px;
+  padding: 7px 13px;
+  font-size: 0.85rem;
+}
+
 .custom-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));

@@ -217,6 +217,87 @@
 .room[data-mode='idle'] .scene-timer .timer-hint { opacity: 0.8; }
 .room .scene-timer:hover .timer-digits { fill: var(--accent); }
 
+/* ---- window views ----------------------------------------------------------
+   Cascade contract: base [data-tod] palettes above set the sky; these
+   [data-view][data-tod] overrides (higher specificity, later in file) adjust
+   ONLY sky vars per view. Room-interior vars always follow the real clock.
+   Night-flavored views (aurora, space) override unconditionally. */
+
+.room[data-view='city'][data-tod='night'] {
+  --sky-top: #12142e;
+  --sky-bottom: #3a2547;
+}
+.room[data-view='aurora'] {
+  --sky-top: #0b1226;
+  --sky-bottom: #14243d;
+}
+.room[data-view='space'] {
+  --sky-top: #05070f;
+  --sky-bottom: #101528;
+}
+
+/* views with their own celestial content hide the shared moon/sun/stars */
+.room[data-view='aurora'] .night-sky,
+.room[data-view='space'] .night-sky,
+.room[data-view='aurora'] .morning-sun,
+.room[data-view='space'] .morning-sun {
+  opacity: 0 !important;
+}
+/* space is already full of stars; skip drift stars there */
+.room[data-view='space'] .drift-stars {
+  opacity: 0;
+}
+
+/* city neon: glows only at night, slow pulse */
+.room .city-neon {
+  opacity: 0;
+  transition: opacity 2s ease;
+}
+.room[data-view='city'][data-tod='night'] .city-neon {
+  opacity: 1;
+  animation: neon-pulse 6s ease-in-out infinite;
+}
+@keyframes neon-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+/* ocean waves drift sideways gently; sail only in the afternoon */
+.room .wave-1 { animation: wave-drift 7s ease-in-out infinite; }
+.room .wave-2 { animation: wave-drift 9s ease-in-out infinite reverse; }
+.room .wave-3 { animation: wave-drift 11s ease-in-out infinite; }
+@keyframes wave-drift {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-6px); }
+}
+.room .ocean-sail { opacity: 0; transition: opacity 2s ease; }
+.room[data-tod='afternoon'] .ocean-sail { opacity: 1; }
+
+/* forest fireflies blink at night */
+.room .fireflies { opacity: 0; transition: opacity 2s ease; }
+.room[data-tod='night'] .fireflies { opacity: 1; }
+.room[data-tod='night'] .firefly-1 { animation: firefly 4.2s ease-in-out infinite; }
+.room[data-tod='night'] .firefly-2 { animation: firefly 5.6s ease-in-out infinite 1.8s; }
+@keyframes firefly {
+  0%, 100% { opacity: 0; transform: translate(0, 0); }
+  35% { opacity: 0.9; }
+  70% { opacity: 0.15; transform: translate(5px, -4px); }
+}
+
+/* aurora ribbons sway very slowly */
+.room .ribbon { transform-origin: center; }
+.room .ribbon-1 { animation: aurora-sway 14s ease-in-out infinite; }
+.room .ribbon-2 { animation: aurora-sway 17s ease-in-out infinite reverse; }
+.room .ribbon-3 { animation: aurora-sway 12s ease-in-out infinite 2s; }
+@keyframes aurora-sway {
+  0%, 100% { transform: translateX(0) scaleY(1); }
+  50% { transform: translateX(7px) scaleY(1.06); }
+}
+
+/* a few space stars twinkle */
+.room[data-view='space'] .space-star:nth-child(2n) { animation: twinkle 4.4s ease-in-out infinite; }
+.room[data-view='space'] .space-star:nth-child(3n) { animation: twinkle 3.2s ease-in-out infinite 1.3s; }
+
 /* ---- session drift: the day quietly mellowing as focus sessions add up ----
    --session-drift (0..1) is set inline by RoomScene from completed sessions.
    Drift only drives overlay OPACITIES via calc(), so it composes with any

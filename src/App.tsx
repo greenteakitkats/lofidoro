@@ -9,12 +9,18 @@ import { SpotifyPanel } from './components/SpotifyPanel'
 import { useAmbience } from './audio/useAmbience'
 import { setDucked } from './audio/mixer'
 import { useSpotify } from './spotify/useSpotify'
+import { useLocalStorage } from './hooks/useLocalStorage'
+import { WindowViewPicker } from './components/WindowViewPicker'
+import { DEFAULT_VIEW, isWindowViewId, type WindowViewId } from './components/Room/views'
+import { STORAGE_KEYS } from './config'
 
 function CozyRoom() {
   const { settings } = useSettings()
   const { state } = useTimer()
   const { mix, setVolume, rainActive } = useAmbience()
   const spotify = useSpotify()
+  const [storedView, setView] = useLocalStorage<WindowViewId>(STORAGE_KEYS.windowView, DEFAULT_VIEW)
+  const view = isWindowViewId(storedView) ? storedView : DEFAULT_VIEW
 
   const onBreak = state.status === 'running' && state.phase !== 'focus'
   // only act on spotify if lofidoro actually found something playing (avoid
@@ -45,8 +51,9 @@ function CozyRoom() {
 
   return (
     <>
-      <RoomScene rain={rainActive} music={spotify.nowPlaying?.isPlaying ?? false} />
+      <RoomScene rain={rainActive} music={spotify.nowPlaying?.isPlaying ?? false} view={view} />
       <Controls />
+      <WindowViewPicker view={view} setView={setView} />
       <MixerPanel mix={mix} setVolume={setVolume} />
       <SpotifyPanel />
       <SettingsPanel />

@@ -1,5 +1,14 @@
-/** Window with time-of-day sky, stars/moon at night, sun in the morning, rain overlay. */
-export function Window() {
+import { WINDOW_VIEWS, type WindowViewId } from './views'
+
+/**
+ * Window with a time-of-day sky, a swappable view outside, and weather /
+ * drift overlays. Z-order inside the clip: sky → tod celestials → active
+ * view → drift overlays → rain → lightning. Only the active view mounts,
+ * so view animations never stack.
+ */
+export function Window({ view }: { view: WindowViewId }) {
+  const ActiveView = (WINDOW_VIEWS.find((v) => v.id === view) ?? WINDOW_VIEWS[0]).component
+
   return (
     <g>
       {/* sky behind the panes */}
@@ -17,7 +26,7 @@ export function Window() {
         <rect x="104" y="84" width="176" height="164" fill="url(#sky)" />
         <rect x="104" y="84" width="176" height="164" className="sky-dim" />
 
-        {/* night: moon + stars */}
+        {/* night: moon + stars (hidden for views that bring their own sky) */}
         <g className="night-sky">
           <circle cx="240" cy="120" r="17" fill="#f4ecd7" />
           <circle cx="233" cy="114" r="5" fill="#e2d7bd" opacity="0.5" />
@@ -32,15 +41,14 @@ export function Window() {
           <circle className="star" cx="121" cy="210" r="1.3" fill="#fff" />
         </g>
 
-        {/* morning sun */}
+        {/* morning sun (also hidden for night-flavored views) */}
         <g className="morning-sun">
           <circle cx="146" cy="128" r="16" fill="#ffdf9e" />
           <circle cx="146" cy="128" r="24" fill="#ffdf9e" opacity="0.25" />
         </g>
 
-        {/* distant hills */}
-        <path d="M104 218 Q150 196 200 214 T280 210 V248 H104 Z" fill="#3b3f63" opacity="0.55" />
-        <path d="M104 230 Q160 214 216 228 T280 226 V248 H104 Z" fill="#333654" opacity="0.7" />
+        {/* the view outside */}
+        <ActiveView />
 
         {/* session drift: extra faint stars easing in as the day's sessions add up */}
         <g className="drift-stars" fill="#fff">
