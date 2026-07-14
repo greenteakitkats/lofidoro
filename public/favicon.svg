@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- cozy mug with steam -->
+  <rect x="2" y="2" width="28" height="28" rx="7" fill="#3a2e3f"/>
+  <path d="M9 14h12v8a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4v-8z" fill="#e8b88a"/>
+  <path d="M21 15h2.5a3 3 0 0 1 0 6H21" fill="none" stroke="#e8b88a" stroke-width="2"/>
+  <path d="M12 6c-1 2 1 2.5 0 4.5M16.5 5c-1 2 1 2.5 0 4.5" fill="none" stroke="#c9a7d8" stroke-width="1.6" stroke-linecap="round"/>
+</svg>

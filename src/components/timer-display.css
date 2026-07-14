@@ -1,0 +1,29 @@
+.timer-display {
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
+  font-size: clamp(3.5rem, 12vw, 6rem);
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  padding: 0 12px;
+  border-radius: 16px;
+  transition: color 0.4s ease, opacity 0.4s ease;
+}
+
+.timer-display.phase-shortBreak,
+.timer-display.phase-longBreak {
+  color: var(--accent-2);
+}
+
+.timer-display.status-idle,
+.timer-display.status-paused {
+  opacity: 0.55;
+}
+
+.timer-display:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 4px;
+}

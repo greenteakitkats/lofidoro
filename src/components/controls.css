@@ -1,0 +1,38 @@
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.controls-session {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.session-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent-2);
+  opacity: 0.55;
+}
+
+.session-dot.filled {
+  background: var(--accent);
+  border-color: var(--accent);
+  opacity: 1;
+}
+
+.controls-phase {
+  margin-left: 8px;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+}
+
+.controls-buttons {
+  display: flex;
+  gap: 10px;
+}

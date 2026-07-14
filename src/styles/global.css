@@ -1,0 +1,105 @@
+/* lofidoro global styles — warm, dim, cozy */
+
+:root {
+  /* room palette (time-of-day tints override --ambient via inline style) */
+  --bg: #241d2b;
+  --bg-soft: #2e2537;
+  --panel: #322940;
+  --panel-border: #453a55;
+  --text: #efe6da;
+  --text-dim: #b3a7c2;
+  --accent: #e8b88a;   /* warm lamp amber */
+  --accent-2: #c9a7d8; /* dusty lavender */
+  --focus-ring: #e8b88a88;
+
+  font-family: 'Avenir Next', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(120% 90% at 50% 0%, var(--bg-soft) 0%, var(--bg) 70%);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.app-header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  align-self: flex-start;
+}
+
+.app-title {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+.app-tagline {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+.btn {
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.08s ease;
+}
+
+.btn:hover {
+  background: var(--panel-border);
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #3a2b1c;
+  font-weight: 600;
+  min-width: 108px;
+}
+
+.btn-primary:hover {
+  background: #f0c79f;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
