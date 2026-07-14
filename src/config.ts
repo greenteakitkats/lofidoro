@@ -36,14 +36,13 @@ export interface AmbienceLayerDef {
   id: AmbienceLayerId
   label: string
   emoji: string
-  file: string
 }
 
 export const AMBIENCE_LAYERS: AmbienceLayerDef[] = [
-  { id: 'rain', label: 'Rain', emoji: '🌧', file: 'rain.mp3' },
-  { id: 'fire', label: 'Fireplace', emoji: '🔥', file: 'fire.mp3' },
-  { id: 'cafe', label: 'Café', emoji: '☕', file: 'cafe.mp3' },
-  { id: 'crickets', label: 'Night crickets', emoji: '🦗', file: 'crickets.mp3' },
+  { id: 'rain', label: 'Rain', emoji: '🌧' },
+  { id: 'fire', label: 'Fireplace', emoji: '🔥' },
+  { id: 'cafe', label: 'Café', emoji: '☕' },
+  { id: 'crickets', label: 'Night crickets', emoji: '🦗' },
 ]
 
 // Spotify — client ID is public by design in the PKCE flow.
