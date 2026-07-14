@@ -1,8 +1,14 @@
 import { CUSTOM_PRESET_ID, MAX_MINUTES, MIN_MINUTES, PRESETS } from '../config'
 import { useSettings } from '../state/SettingsContext'
 import { useNotifications } from '../hooks/useNotifications'
-import type { Intervals } from '../types'
+import type { BreakAudioBehavior, Intervals } from '../types'
 import './panels.css'
+
+const BREAK_AUDIO_OPTIONS: Array<{ value: BreakAudioBehavior; label: string }> = [
+  { value: 'pause', label: 'pause' },
+  { value: 'duck', label: 'lower volume' },
+  { value: 'nothing', label: 'leave it' },
+]
 
 function clampMinutes(v: number): number {
   if (!Number.isFinite(v)) return MIN_MINUTES
@@ -107,6 +113,19 @@ export function SettingsPanel() {
           />
           <span>desktop notifications</span>
         </label>
+      </div>
+
+      <h2 className="panel-title panel-title-spaced">on a break, music & ambience should</h2>
+      <div className="preset-row">
+        {BREAK_AUDIO_OPTIONS.map((opt) => (
+          <button
+            key={opt.value}
+            className={'chip' + (settings.breakAudio === opt.value ? ' active' : '')}
+            onClick={() => update({ breakAudio: opt.value })}
+          >
+            {opt.label}
+          </button>
+        ))}
       </div>
     </section>
   )
