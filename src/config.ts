@@ -59,4 +59,6 @@ export const STORAGE_KEYS = {
   mix: 'lofidoro:mix',
   spotifyTokens: 'lofidoro:spotify_tokens',
   spotifyLastPlaylist: 'lofidoro:spotify_last_playlist',
+  dayProgress: 'lofidoro:day_progress',
+  windowView: 'lofidoro:window_view',
 } as const

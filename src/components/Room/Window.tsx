@@ -42,6 +42,19 @@ export function Window() {
         <path d="M104 218 Q150 196 200 214 T280 210 V248 H104 Z" fill="#3b3f63" opacity="0.55" />
         <path d="M104 230 Q160 214 216 228 T280 226 V248 H104 Z" fill="#333654" opacity="0.7" />
 
+        {/* session drift: extra faint stars easing in as the day's sessions add up */}
+        <g className="drift-stars" fill="#fff">
+          <circle cx="120" cy="96" r="1.1" />
+          <circle cx="164" cy="118" r="0.9" />
+          <circle cx="216" cy="103" r="1.2" />
+          <circle cx="146" cy="142" r="0.8" />
+          <circle cx="242" cy="136" r="1" />
+          <circle cx="196" cy="158" r="0.9" />
+        </g>
+
+        {/* session drift: golden warmth washing over the view */}
+        <rect className="drift-warmth" x="104" y="84" width="176" height="164" />
+
         {/* rain (visible when the rain ambience layer is audible) */}
         <g className="rain" stroke="#bcd3ef" strokeWidth="1.4" strokeLinecap="round">
           {Array.from({ length: 14 }, (_, i) => {
@@ -50,6 +63,9 @@ export function Window() {
             return <line key={i} x1={x} y1={y} x2={x - 3} y2={y + 15} />
           })}
         </g>
+
+        {/* lightning flash — audible thunder occasionally lights the window */}
+        <rect className="lightning" x="104" y="84" width="176" height="164" fill="#eef3ff" />
       </g>
 
       {/* frame + cross bars + sill */}

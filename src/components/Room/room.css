@@ -217,6 +217,70 @@
 .room[data-mode='idle'] .scene-timer .timer-hint { opacity: 0.8; }
 .room .scene-timer:hover .timer-digits { fill: var(--accent); }
 
+/* ---- session drift: the day quietly mellowing as focus sessions add up ----
+   --session-drift (0..1) is set inline by RoomScene from completed sessions.
+   Drift only drives overlay OPACITIES via calc(), so it composes with any
+   time-of-day palette or window view instead of replacing them. Caps are
+   deliberately tiny — "the afternoon is mellowing", never a mode switch. */
+@property --session-drift {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+.room .drift-warmth {
+  fill: #ff9d5c;
+  opacity: calc(var(--session-drift, 0) * 0.16);
+  transition: opacity 2s ease;
+  pointer-events: none;
+}
+
+.room .drift-room-glow {
+  fill: #ffb877;
+  opacity: calc(var(--session-drift, 0) * 0.06);
+  transition: opacity 2s ease;
+  pointer-events: none;
+}
+
+.room .drift-stars {
+  opacity: calc(var(--session-drift, 0) * 0.85);
+  transition: opacity 2s ease;
+}
+/* the real night sky already has stars; don't double up */
+.room[data-tod='night'] .drift-stars {
+  opacity: 0;
+}
+
+/* lamp warms a touch more as the day deepens */
+.room[data-mode='focus'] .lamp-glow {
+  opacity: calc(0.95 + var(--session-drift, 0) * 0.05);
+}
+
+/* ---- weather overlays ----------------------------------------------------
+   Weather is independent of window views: data-weather-ish booleans on .room
+   are derived from audible mixer layers (data-rain, data-thunder today;
+   snow / fog / heavy-rain slot in here later as sibling rules). */
+
+/* lightning: occasional double-strobe while thunder is audible. Deliberately
+   NOT synced to the thunder audio loop (different loop lengths) — real storms
+   decouple flash and rumble too; syncing would need JS event scheduling. */
+.room .lightning {
+  opacity: 0;
+  pointer-events: none;
+}
+.room[data-thunder='true'] .lightning {
+  animation: lightning-flash 19s linear infinite;
+}
+@keyframes lightning-flash {
+  0%, 40.9% { opacity: 0; }
+  41% { opacity: 0.62; }
+  41.6% { opacity: 0; }
+  42% { opacity: 0.35; }
+  43%, 77.9% { opacity: 0; }
+  78% { opacity: 0.5; }
+  79%, 100% { opacity: 0; }
+}
+
 /* pause everything when the tab is hidden (saves CPU) */
 .room.hidden *, .room.hidden { animation-play-state: paused !important; }
 
