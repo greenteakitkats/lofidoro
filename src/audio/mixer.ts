@@ -23,7 +23,19 @@ const SMOOTHING = 0.08
 let master: GainNode | null = null
 let ducked = false
 const layers = new Map<AmbienceLayerId, Layer>()
-const volumes: AmbienceMix = { rain: 0, fire: 0, cafe: 0, crickets: 0 }
+const volumes: AmbienceMix = {
+  lofi: 0,
+  rain: 0,
+  fire: 0,
+  cafe: 0,
+  typing: 0,
+  crickets: 0,
+  birds: 0,
+  waves: 0,
+  stream: 0,
+  thunder: 0,
+  wind: 0,
+}
 
 function ensureMaster(ctx: AudioContext): GainNode {
   if (!master) {

@@ -17,7 +17,7 @@ import { STORAGE_KEYS } from './config'
 function CozyRoom() {
   const { settings } = useSettings()
   const { state } = useTimer()
-  const { mix, setVolume, rainActive } = useAmbience()
+  const { mix, setVolume, rainActive, thunderActive, lofiActive } = useAmbience()
   const spotify = useSpotify()
   const [storedView, setView] = useLocalStorage<WindowViewId>(STORAGE_KEYS.windowView, DEFAULT_VIEW)
   const view = isWindowViewId(storedView) ? storedView : DEFAULT_VIEW
@@ -51,7 +51,12 @@ function CozyRoom() {
 
   return (
     <>
-      <RoomScene rain={rainActive} music={spotify.nowPlaying?.isPlaying ?? false} view={view} />
+      <RoomScene
+        view={view}
+        rain={rainActive}
+        thunder={thunderActive}
+        music={(spotify.nowPlaying?.isPlaying ?? false) || lofiActive}
+      />
       <Controls />
       <WindowViewPicker view={view} setView={setView} />
       <MixerPanel mix={mix} setVolume={setVolume} />

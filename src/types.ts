@@ -26,6 +26,19 @@ export interface Settings {
   breakAudio: BreakAudioBehavior
 }
 
-export type AmbienceLayerId = 'rain' | 'fire' | 'cafe' | 'crickets'
+export type AmbienceLayerId =
+  | 'lofi'
+  | 'rain'
+  | 'fire'
+  | 'cafe'
+  | 'typing'
+  | 'crickets'
+  | 'birds'
+  | 'waves'
+  | 'stream'
+  | 'thunder'
+  | 'wind'
+
+export type AmbienceGroup = 'music' | 'cozy' | 'nature' | 'weather'
 
 export type AmbienceMix = Record<AmbienceLayerId, number>

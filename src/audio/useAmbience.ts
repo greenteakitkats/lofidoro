@@ -5,7 +5,21 @@ import { useLocalStorage } from '../hooks/useLocalStorage'
 import { applyPrimedMix, primeMix, setLayerVolume } from './mixer'
 import { unlockAudio } from './context'
 
-const EMPTY_MIX: AmbienceMix = { rain: 0, fire: 0, cafe: 0, crickets: 0 }
+// loadJSON shallow-merges stored values over this fallback, so mixes saved
+// before new layers existed pick up the new keys at 0 automatically
+const EMPTY_MIX: AmbienceMix = {
+  lofi: 0,
+  rain: 0,
+  fire: 0,
+  cafe: 0,
+  typing: 0,
+  crickets: 0,
+  birds: 0,
+  waves: 0,
+  stream: 0,
+  thunder: 0,
+  wind: 0,
+}
 
 /** React face of the mixer: persisted slider values + lazy audible start. */
 export function useAmbience() {
@@ -36,5 +50,11 @@ export function useAmbience() {
     [setMix],
   )
 
-  return { mix, setVolume, rainActive: mix.rain > 0 }
+  return {
+    mix,
+    setVolume,
+    rainActive: mix.rain > 0,
+    thunderActive: mix.thunder > 0,
+    lofiActive: mix.lofi > 0,
+  }
 }

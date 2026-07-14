@@ -1,4 +1,4 @@
-import type { Preset, Settings, AmbienceLayerId } from './types'
+import type { Preset, Settings, AmbienceLayerId, AmbienceGroup } from './types'
 
 export const PRESETS: Preset[] = [
   {
@@ -36,13 +36,28 @@ export interface AmbienceLayerDef {
   id: AmbienceLayerId
   label: string
   emoji: string
+  group: AmbienceGroup
 }
 
 export const AMBIENCE_LAYERS: AmbienceLayerDef[] = [
-  { id: 'rain', label: 'Rain', emoji: '🌧' },
-  { id: 'fire', label: 'Fireplace', emoji: '🔥' },
-  { id: 'cafe', label: 'Café', emoji: '☕' },
-  { id: 'crickets', label: 'Night crickets', emoji: '🦗' },
+  { id: 'lofi', label: 'Lo-fi radio', emoji: '📻', group: 'music' },
+  { id: 'fire', label: 'Fireplace', emoji: '🔥', group: 'cozy' },
+  { id: 'cafe', label: 'Café', emoji: '☕', group: 'cozy' },
+  { id: 'typing', label: 'Typing', emoji: '⌨️', group: 'cozy' },
+  { id: 'birds', label: 'Morning birds', emoji: '🐦', group: 'nature' },
+  { id: 'waves', label: 'Ocean waves', emoji: '🌊', group: 'nature' },
+  { id: 'stream', label: 'Forest stream', emoji: '🏞', group: 'nature' },
+  { id: 'crickets', label: 'Night crickets', emoji: '🦗', group: 'nature' },
+  { id: 'rain', label: 'Rain', emoji: '🌧', group: 'weather' },
+  { id: 'thunder', label: 'Thunder', emoji: '⛈', group: 'weather' },
+  { id: 'wind', label: 'Wind', emoji: '🍃', group: 'weather' },
+]
+
+export const AMBIENCE_GROUPS: Array<{ id: AmbienceGroup; label: string }> = [
+  { id: 'music', label: 'music' },
+  { id: 'cozy', label: 'cozy' },
+  { id: 'nature', label: 'nature' },
+  { id: 'weather', label: 'weather' },
 ]
 
 // Spotify — client ID is public by design in the PKCE flow.

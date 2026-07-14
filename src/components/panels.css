@@ -126,6 +126,28 @@
   height: 16px;
 }
 
+.mixer-groups {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+@media (min-width: 640px) {
+  .mixer-groups {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 28px;
+  }
+}
+
+.mixer-group-title {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--accent-2);
+  opacity: 0.85;
+}
+
 .mixer-grid {
   display: flex;
   flex-direction: column;
