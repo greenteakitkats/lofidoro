@@ -33,20 +33,54 @@ export function Cat() {
         <ellipse cx="338" cy="446" rx="6" ry="3.4" fill={furDark} />
       </g>
 
-      {/* asleep: curled ball, breathing */}
+      {/* asleep: three poses, one per data-cat-pose, cycling through the day */}
       <g className="cat-asleep">
-        <g className="cat-body">
-          <ellipse cx="330" cy="432" rx="34" ry="20" fill={fur} />
-          {/* tail wrapped around */}
-          <path d="M300 438 q -6 -14 12 -18" fill="none" stroke={furDark} strokeWidth="7" strokeLinecap="round" />
-          {/* tucked head */}
-          <circle cx="352" cy="428" r="13" fill={fur} />
-          <path d="M344 419 l -2 -9 l 8 4.5 Z" fill={furDark} />
-          <path d="M362 421 l 3 -8.5 l -9 3.5 Z" fill={furDark} />
-          {/* closed eyes */}
-          <path d="M348 428 q 2 2 4 0" fill="none" stroke="#2b222d" strokeWidth="1.4" strokeLinecap="round" />
-          <path d="M356 428 q 2 2 4 0" fill="none" stroke="#2b222d" strokeWidth="1.4" strokeLinecap="round" />
+        {/* pose a: curled ball */}
+        <g className="cat-pose cat-pose-a">
+          <g className="cat-body">
+            <ellipse cx="330" cy="432" rx="34" ry="20" fill={fur} />
+            {/* tail wrapped around */}
+            <path d="M300 438 q -6 -14 12 -18" fill="none" stroke={furDark} strokeWidth="7" strokeLinecap="round" />
+            {/* tucked head */}
+            <circle cx="352" cy="428" r="13" fill={fur} />
+            <path d="M344 419 l -2 -9 l 8 4.5 Z" fill={furDark} />
+            <path d="M362 421 l 3 -8.5 l -9 3.5 Z" fill={furDark} />
+            {/* closed eyes */}
+            <path d="M348 428 q 2 2 4 0" fill="none" stroke="#2b222d" strokeWidth="1.4" strokeLinecap="round" />
+            <path d="M356 428 q 2 2 4 0" fill="none" stroke="#2b222d" strokeWidth="1.4" strokeLinecap="round" />
+          </g>
         </g>
+
+        {/* pose b: stretched out on one side */}
+        <g className="cat-pose cat-pose-b">
+          <g className="cat-body">
+            <ellipse cx="328" cy="438" rx="42" ry="13" fill={fur} />
+            {/* outstretched tail */}
+            <path d="M286 440 q -16 -2 -20 -12" fill="none" stroke={furDark} strokeWidth="7" strokeLinecap="round" />
+            {/* head resting on the rug */}
+            <circle cx="366" cy="434" r="12.5" fill={fur} />
+            <path d="M359 425 l -2.5 -8.5 l 8 4 Z" fill={furDark} />
+            <path d="M375 427 l 3.5 -8 l -9 3 Z" fill={furDark} />
+            <path d="M362 434 q 2 2 4 0" fill="none" stroke="#2b222d" strokeWidth="1.4" strokeLinecap="round" />
+            <path d="M370 434 q 2 2 4 0" fill="none" stroke="#2b222d" strokeWidth="1.4" strokeLinecap="round" />
+            {/* front paws stretched */}
+            <ellipse cx="352" cy="447" rx="7" ry="3" fill={furDark} />
+          </g>
+        </g>
+
+        {/* pose c: loaf, facing away */}
+        <g className="cat-pose cat-pose-c">
+          <g className="cat-body">
+            <path d="M304 448 q -3 -24 26 -25 q 29 1 26 25 q 0 3 -4 3 h -44 q -4 0 -4 -3 Z" fill={fur} />
+            {/* back of head */}
+            <circle cx="330" cy="420" r="14" fill={fur} />
+            <path d="M318 411 l -2.5 -10 l 9 5 Z" fill={furDark} />
+            <path d="M342 411 l 2.5 -10 l -9 5 Z" fill={furDark} />
+            {/* tail curled alongside */}
+            <path d="M352 448 q 12 -4 10 -16" fill="none" stroke={furDark} strokeWidth="7" strokeLinecap="round" />
+          </g>
+        </g>
+
         <g className="zz">
           <text x="372" y="404">z</text>
           <text x="380" y="396">z</text>

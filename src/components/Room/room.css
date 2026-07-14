@@ -337,6 +337,61 @@
   opacity: calc(0.95 + var(--session-drift, 0) * 0.05);
 }
 
+/* ---- delightful details: the day accumulating in the scene ----------------
+   data-growth (0–3) and data-cat-pose (0–2) come from completed sessions.
+   Stages are cumulative and default-hidden (opacity 0), revealed by
+   attribute selectors — never by animation, so reduced-motion is safe. */
+
+/* the sill plant grows */
+.room .plant-stage { opacity: 0; transition: opacity 2.5s ease; }
+.room[data-growth='0'] .plant-stage-0 { opacity: 1; }
+.room[data-growth='1'] .plant-stage-1,
+.room[data-growth='2'] .plant-stage-1,
+.room[data-growth='3'] .plant-stage-1 { opacity: 1; }
+.room[data-growth='2'] .plant-stage-2,
+.room[data-growth='3'] .plant-stage-2 { opacity: 1; }
+.room[data-growth='3'] .plant-stage-3 { opacity: 1; }
+
+/* the candle burns down */
+.room .candle-wax,
+.room .candle-flame {
+  transform-box: fill-box;
+  transition: transform 3s ease;
+}
+.room .candle-wax { transform-origin: 50% 100%; }
+.room[data-growth='1'] .candle-wax { transform: scaleY(0.78); }
+.room[data-growth='2'] .candle-wax { transform: scaleY(0.58); }
+.room[data-growth='3'] .candle-wax { transform: scaleY(0.42); }
+.room[data-growth='1'] .candle-flame { transform: translateY(6px); }
+.room[data-growth='2'] .candle-flame { transform: translateY(12px); }
+.room[data-growth='3'] .candle-flame { transform: translateY(16px); }
+
+/* the notebook fills with ink */
+.room .ink { opacity: 0; transition: opacity 2.5s ease; }
+.room[data-growth='1'] .ink-0,
+.room[data-growth='2'] .ink-0,
+.room[data-growth='3'] .ink-0 { opacity: 1; }
+.room[data-growth='2'] .ink-1,
+.room[data-growth='3'] .ink-1 { opacity: 1; }
+.room[data-growth='3'] .ink-2,
+.room[data-growth='3'] .ink-3 { opacity: 1; }
+
+/* the tea settles later in the day: steam thins out */
+.room[data-growth='2'] .steam path,
+.room[data-growth='3'] .steam path { animation-duration: 4.6s; }
+
+/* the cat cycles sleeping poses through the day */
+.room .cat-pose { opacity: 0; }
+.room .cat-pose .cat-body { animation: none; }
+.room[data-cat-pose='0'] .cat-pose-a,
+.room[data-cat-pose='1'] .cat-pose-b,
+.room[data-cat-pose='2'] .cat-pose-c { opacity: 1; }
+.room[data-cat-pose='0'] .cat-pose-a .cat-body,
+.room[data-cat-pose='1'] .cat-pose-b .cat-body,
+.room[data-cat-pose='2'] .cat-pose-c .cat-body {
+  animation: cat-breathe 3.8s ease-in-out infinite;
+}
+
 /* ---- weather overlays ----------------------------------------------------
    Weather is independent of window views: data-weather-ish booleans on .room
    are derived from audible mixer layers (data-rain, data-thunder today;

@@ -1,4 +1,5 @@
 import { WINDOW_VIEWS, type WindowViewId } from './views'
+import { Plant } from './details/Plant'
 
 /**
  * Window with a time-of-day sky, a swappable view outside, and weather /
@@ -82,11 +83,8 @@ export function Window({ view }: { view: WindowViewId }) {
       <line x1="104" y1="166" x2="280" y2="166" stroke="#2c2335" strokeWidth="7" />
       <rect x="88" y="252" width="208" height="12" rx="5" fill="#2c2335" />
 
-      {/* little plant on the sill */}
-      <g>
-        <path d="M136 252 c -3 -10 -12 -13 -15 -21 c 8 1 13 6 15 12 c 2 -9 7 -15 15 -17 c -2 10 -9 14 -13 26 Z" fill="#6f9d6b" />
-        <path d="M128 252 h 17 l -2.5 11 h -12 Z" fill="#b3705f" />
-      </g>
+      {/* the sill plant, growing with the day */}
+      <Plant />
     </g>
   )
 }

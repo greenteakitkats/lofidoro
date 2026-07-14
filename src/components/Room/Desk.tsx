@@ -1,4 +1,6 @@
-/** Desk with mug (steam), candle, book stack, and a little radio with an equalizer. */
+import { Notebook } from './details/Notebook'
+
+/** Desk with mug (steam), candle, notebook, book stack, and a little radio with an equalizer. */
 export function Desk() {
   return (
     <g>
@@ -40,12 +42,17 @@ export function Desk() {
         <rect x="606" y="288" width="36" height="10" rx="2.5" fill="#8f9d72" />
       </g>
 
-      {/* candle (flame lit during focus) */}
+      {/* notebook filling with the day's work */}
+      <Notebook />
+
+      {/* candle (flame lit during focus; burns down as the day's sessions add up) */}
       <g>
-        <ellipse className="flame" cx="672" cy="281" rx="4.5" ry="8" fill="#ffce7a" />
-        <ellipse className="flame" cx="672" cy="283" rx="2.2" ry="4.5" fill="#fff3d0" />
-        <rect x="665" y="290" width="14" height="28" rx="4" fill="#e8e0d0" />
-        <line x1="672" y1="290" x2="672" y2="286" stroke="#5a4a3a" strokeWidth="1.6" />
+        <g className="candle-flame">
+          <ellipse className="flame" cx="672" cy="281" rx="4.5" ry="8" fill="#ffce7a" />
+          <ellipse className="flame" cx="672" cy="283" rx="2.2" ry="4.5" fill="#fff3d0" />
+          <line x1="672" y1="290" x2="672" y2="286" stroke="#5a4a3a" strokeWidth="1.6" />
+        </g>
+        <rect className="candle-wax" x="665" y="290" width="14" height="28" rx="4" fill="#e8e0d0" />
       </g>
     </g>
   )
