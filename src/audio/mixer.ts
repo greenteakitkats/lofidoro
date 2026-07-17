@@ -28,7 +28,6 @@ const volumes: AmbienceMix = {
   lofi: 0,
   rain: 0,
   fire: 0,
-  cafe: 0,
   typing: 0,
   crickets: 0,
   birds: 0,
@@ -75,7 +74,11 @@ export function setLayerVolume(id: AmbienceLayerId, volume: number): void {
 
 /** Restore a persisted mix without a user gesture — layers actually start on first interaction. */
 export function primeMix(mix: AmbienceMix): void {
-  Object.assign(volumes, mix)
+  // copy only keys we still recognize, so a mix saved with a since-removed
+  // layer (e.g. an old 'cafe' value) can't leak in and crash ensureLayer
+  for (const id of Object.keys(volumes) as AmbienceLayerId[]) {
+    if (id in mix) volumes[id] = mix[id]
+  }
 }
 
 /** Called on the first user gesture to make a persisted mix audible. */
@@ -83,7 +86,7 @@ export function applyPrimedMix(): void {
   const ctx = getAudioContext()
   if (!ctx) return
   for (const id of Object.keys(volumes) as AmbienceLayerId[]) {
-    if (volumes[id] > 0) {
+    if (volumes[id] > 0 && GENERATORS[id]) {
       const { gain } = ensureLayer(ctx, id)
       gain.gain.setTargetAtTime(volumes[id] * volumes[id], ctx.currentTime, SMOOTHING)
     }

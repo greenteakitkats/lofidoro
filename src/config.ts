@@ -44,7 +44,6 @@ export interface AmbienceLayerDef {
 export const AMBIENCE_LAYERS: AmbienceLayerDef[] = [
   { id: 'lofi', label: 'Lo-fi radio', emoji: '📻', group: 'music' },
   { id: 'fire', label: 'Fireplace', emoji: '🔥', group: 'cozy' },
-  { id: 'cafe', label: 'Café', emoji: '☕', group: 'cozy' },
   { id: 'typing', label: 'Typing', emoji: '⌨️', group: 'cozy' },
   { id: 'birds', label: 'Morning birds', emoji: '🐦', group: 'nature' },
   { id: 'waves', label: 'Ocean waves', emoji: '🌊', group: 'nature' },

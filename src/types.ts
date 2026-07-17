@@ -32,7 +32,6 @@ export type AmbienceLayerId =
   | 'lofi'
   | 'rain'
   | 'fire'
-  | 'cafe'
   | 'typing'
   | 'crickets'
   | 'birds'

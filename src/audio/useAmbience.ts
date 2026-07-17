@@ -11,7 +11,6 @@ const EMPTY_MIX: AmbienceMix = {
   lofi: 0,
   rain: 0,
   fire: 0,
-  cafe: 0,
   typing: 0,
   crickets: 0,
   birds: 0,
