@@ -1,8 +1,18 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  createContext,
+  createElement,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
 import * as auth from './auth'
 import * as api from './api'
 import { createPlayer, isIOS, type PlayerHandle } from './player'
-import { SPOTIFY_CLIENT_ID } from '../config'
+import { SPOTIFY_CLIENT_ID, STORAGE_KEYS } from '../config'
+import { loadJSON } from '../hooks/useLocalStorage'
 
 export type SpotifyMode = 'disconnected' | 'connecting' | 'sdk' | 'remote' | 'no-device' | 'error'
 
@@ -13,9 +23,42 @@ export interface NowPlaying {
   isPlaying: boolean
 }
 
+export interface SpotifyApi {
+  mode: SpotifyMode
+  connected: boolean
+  canDuck: boolean
+  nowPlaying: NowPlaying | null
+  errorMessage: string | null
+  login: () => void
+  disconnect: () => void
+  play: (contextUri?: string) => void
+  pause: () => void
+  skipNext: () => void
+  skipPrevious: () => void
+  setVolume: (percent: number) => void
+}
+
 const POLL_MS = 5000
 
-export function useSpotify() {
+const SpotifyContext = createContext<SpotifyApi | null>(null)
+
+function toNowPlaying(state: SpotifyPlaybackState): NowPlaying {
+  const track = state.track_window.current_track
+  return {
+    name: track.name,
+    artist: track.artists.map((a) => a.name).join(', '),
+    albumArt: track.album.images[0]?.url ?? null,
+    isPlaying: !state.paused,
+  }
+}
+
+/**
+ * One Spotify connection for the whole app. This MUST be a single provider:
+ * two instances of this logic would each spin up a Web Playback SDK player
+ * and fight over the connection (which is exactly the bug that motivated
+ * the context — a panel stuck on "connecting…" while a second player won).
+ */
+export function SpotifyProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<SpotifyMode>('disconnected')
   const [nowPlaying, setNowPlaying] = useState<NowPlaying | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -38,19 +81,16 @@ export function useSpotify() {
           playerRef.current = handle
           await api.transferPlayback(handle.deviceId)
           handle.instance.addListener('player_state_changed', ({ state }) => {
-            if (!state) return
-            const track = state.track_window.current_track
-            setNowPlaying({
-              name: track.name,
-              artist: track.artists.map((a) => a.name).join(', '),
-              albumArt: track.album.images[0]?.url ?? null,
-              isPlaying: !state.paused,
-            })
+            if (state) setNowPlaying(toNowPlaying(state))
           })
+          // populate now-playing immediately; state_changed only fires on changes
+          const current = await handle.instance.getCurrentState()
+          if (current) setNowPlaying(toNowPlaying(current))
           setMode('sdk')
           return
         } catch {
-          // fall through to remote-control mode
+          // SDK failed or timed out — degrade to remote-control mode
+          playerRef.current = null
         }
       }
       setMode('remote')
@@ -60,13 +100,15 @@ export function useSpotify() {
     }
   }, [])
 
-  // on mount: finish PKCE redirect if present, then connect if we have tokens
+  // on mount (StrictMode-safe): finish PKCE redirect, then connect if logged in
+  const bootedRef = useRef(false)
   useEffect(() => {
+    if (bootedRef.current) return
+    bootedRef.current = true
     void auth.handleRedirect().then(() => {
       if (auth.isLoggedIn()) void connect()
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [connect])
 
   // remote-control mode: poll now-playing
   useEffect(() => {
@@ -116,14 +158,23 @@ export function useSpotify() {
     setNowPlaying(null)
   }, [])
 
-  const play = useCallback((contextUri?: string) => {
-    if (mode === 'sdk' && playerRef.current) {
-      if (contextUri) void api.play(playerRef.current.deviceId, contextUri)
-      else void playerRef.current.instance.resume()
-    } else {
-      void api.play(undefined, contextUri)
-    }
-  }, [mode])
+  const play = useCallback(
+    (contextUri?: string) => {
+      // nothing loaded yet and no explicit choice: fall back to the last playlist
+      let uri = contextUri
+      if (!uri && !nowPlaying) {
+        const last = loadJSON<string>(STORAGE_KEYS.spotifyLastPlaylist, '')
+        if (last) uri = `spotify:playlist:${last}`
+      }
+      if (mode === 'sdk' && playerRef.current) {
+        if (uri) void api.play(playerRef.current.deviceId, uri)
+        else void playerRef.current.instance.resume()
+      } else {
+        void api.play(undefined, uri)
+      }
+    },
+    [mode, nowPlaying],
+  )
 
   const pausePlayback = useCallback(() => {
     if (mode === 'sdk' && playerRef.current) void playerRef.current.instance.pause()
@@ -141,14 +192,11 @@ export function useSpotify() {
   }, [mode])
 
   /** True volume ducking — Premium/SDK only; no-op (silently) elsewhere. */
-  const setVolume = useCallback(
-    (percent: number) => {
-      if (mode === 'sdk' && playerRef.current) void playerRef.current.instance.setVolume(percent / 100)
-    },
-    [mode],
-  )
+  const setVolume = useCallback((percent: number) => {
+    if (playerRef.current) void playerRef.current.instance.setVolume(percent / 100)
+  }, [])
 
-  return {
+  const value: SpotifyApi = {
     mode,
     connected: mode === 'sdk' || mode === 'remote' || mode === 'no-device',
     canDuck: mode === 'sdk',
@@ -162,4 +210,12 @@ export function useSpotify() {
     skipPrevious,
     setVolume,
   }
+
+  return createElement(SpotifyContext.Provider, { value }, children)
+}
+
+export function useSpotify(): SpotifyApi {
+  const ctx = useContext(SpotifyContext)
+  if (!ctx) throw new Error('useSpotify must be used within SpotifyProvider')
+  return ctx
 }

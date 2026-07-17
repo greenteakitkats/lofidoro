@@ -8,7 +8,7 @@ import { MixerPanel } from './components/MixerPanel'
 import { SpotifyPanel } from './components/SpotifyPanel'
 import { useAmbience } from './audio/useAmbience'
 import { setDucked } from './audio/mixer'
-import { useSpotify } from './spotify/useSpotify'
+import { SpotifyProvider, useSpotify } from './spotify/useSpotify'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import { WindowViewPicker } from './components/WindowViewPicker'
 import { DEFAULT_VIEW, isWindowViewId, type WindowViewId } from './components/Room/views'
@@ -70,11 +70,13 @@ export default function App() {
   return (
     <SettingsProvider>
       <TimerProvider>
-        <header className="app-header">
-          <h1 className="app-title">lofidoro</h1>
-          <span className="app-tagline">a cozy little focus room</span>
-        </header>
-        <CozyRoom />
+        <SpotifyProvider>
+          <header className="app-header">
+            <h1 className="app-title">lofidoro</h1>
+            <span className="app-tagline">a cozy little focus room</span>
+          </header>
+          <CozyRoom />
+        </SpotifyProvider>
       </TimerProvider>
     </SettingsProvider>
   )

@@ -32,7 +32,13 @@ export interface PlayerHandle {
   instance: SpotifyPlayerInstance
 }
 
-/** Creates and connects a Web Playback SDK player. Resolves once a device_id is assigned. */
+const READY_TIMEOUT_MS = 12_000
+
+/**
+ * Creates and connects a Web Playback SDK player. Resolves once a device_id
+ * is assigned; rejects on any SDK error or a ready-timeout so callers can
+ * fall back to remote-control mode instead of hanging in "connecting".
+ */
 export function createPlayer(): Promise<PlayerHandle> {
   return loadSdk().then(
     () =>
@@ -46,11 +52,25 @@ export function createPlayer(): Promise<PlayerHandle> {
           },
           volume: 0.8,
         })
+        let settled = false
+        const settle = (fn: () => void) => {
+          if (settled) return
+          settled = true
+          clearTimeout(timer)
+          fn()
+        }
+        const fail = (why: string) =>
+          settle(() => {
+            instance.disconnect()
+            reject(new Error(why))
+          })
+        const timer = setTimeout(() => fail('SDK player never became ready'), READY_TIMEOUT_MS)
         instance.addListener('ready', ({ device_id }) => {
-          if (device_id) resolve({ deviceId: device_id, instance })
+          if (device_id) settle(() => resolve({ deviceId: device_id, instance }))
         })
-        instance.addListener('initialization_error', ({ message }) => reject(new Error(message)))
-        instance.addListener('authentication_error', ({ message }) => reject(new Error(message)))
+        instance.addListener('initialization_error', ({ message }) => fail(message ?? 'init error'))
+        instance.addListener('authentication_error', ({ message }) => fail(message ?? 'auth error'))
+        instance.addListener('account_error', ({ message }) => fail(message ?? 'account error'))
         void instance.connect()
       }),
   )
