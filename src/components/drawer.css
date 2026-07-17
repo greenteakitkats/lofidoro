@@ -1,0 +1,295 @@
+/* ---- accordion drawers ---------------------------------------------------- */
+
+.drawers {
+  width: 100%;
+  max-width: 560px;
+  border-top: 1px solid var(--hairline);
+}
+
+.drawer {
+  border-bottom: 1px solid var(--hairline);
+}
+
+.drawer-header {
+  width: 100%;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 16px 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--serif);
+  color: var(--text);
+  transition: color 0.15s ease;
+}
+.drawer-header:hover {
+  color: var(--accent);
+}
+.drawer-header:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.drawer-label {
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+}
+
+.drawer-hint {
+  flex: 1;
+  text-align: right;
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.drawer-chevron {
+  flex-shrink: 0;
+  color: var(--text-faint);
+  transition: transform 0.25s ease, color 0.15s ease;
+}
+.drawer.open .drawer-chevron {
+  transform: rotate(180deg);
+  color: var(--accent);
+}
+.drawer-header:hover .drawer-chevron {
+  color: var(--accent);
+}
+
+/* height animation via grid-rows — no JS measuring */
+.drawer-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.28s ease;
+}
+.drawer.open .drawer-body {
+  grid-template-rows: 1fr;
+}
+.drawer-body-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+.drawer.open .drawer-body-inner {
+  /* padding only when open so collapsed height is a true zero */
+  padding: 2px 6px 24px;
+}
+
+.drawer-note {
+  margin: 14px 0 0;
+  font-size: 0.8rem;
+  font-style: italic;
+  font-family: var(--serif);
+  color: var(--text-faint);
+  line-height: 1.5;
+}
+
+/* ---- chips (presets, break behavior) -------------------------------------- */
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.chip:hover {
+  border-color: var(--accent-2);
+}
+.chip.active {
+  background: rgba(230, 180, 131, 0.14);
+  border-color: var(--accent);
+}
+.chip-sub {
+  font-size: 0.7rem;
+  color: var(--text-faint);
+}
+
+/* ---- custom interval fields ----------------------------------------------- */
+
+.custom-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  position: relative;
+}
+.field input {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  width: 100%;
+}
+.field input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+.field-unit {
+  position: absolute;
+  right: 10px;
+  bottom: 9px;
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  pointer-events: none;
+}
+
+/* ---- toggles -------------------------------------------------------------- */
+
+.toggle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+}
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.toggle input {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+}
+
+/* fade-lead slider row */
+.fade-field {
+  display: block;
+  margin-top: 16px;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+.fade-field span {
+  display: block;
+  margin-bottom: 8px;
+}
+.fade-field strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ---- ambience mixer ------------------------------------------------------- */
+
+.mixer-groups {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+@media (min-width: 560px) {
+  .mixer-groups {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 30px;
+  }
+}
+.mixer-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+.mixer-row {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  grid-template-areas: 'icon label' 'slider slider';
+  align-items: center;
+  gap: 4px 10px;
+  cursor: pointer;
+}
+.mixer-icon {
+  grid-area: icon;
+  color: var(--text-faint);
+  transition: color 0.2s ease;
+}
+.mixer-row.active .mixer-icon {
+  color: var(--accent);
+}
+.mixer-label {
+  grid-area: label;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+.mixer-row.active .mixer-label {
+  color: var(--text);
+}
+.mixer-row .slider {
+  grid-area: slider;
+}
+
+/* ---- window view picker --------------------------------------------------- */
+
+.view-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: 12px;
+}
+.view-swatch {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.76rem;
+  color: var(--text-faint);
+  transition: color 0.15s ease;
+}
+.view-swatch svg {
+  width: 100%;
+  aspect-ratio: 16 / 13;
+  border-radius: 10px;
+  border: 1.5px solid var(--hairline);
+  transition: border-color 0.18s ease, transform 0.12s ease;
+  display: block;
+}
+.view-swatch:hover svg {
+  border-color: var(--accent-2);
+}
+.view-swatch:hover {
+  color: var(--text-dim);
+}
+.view-swatch.active svg {
+  border-color: var(--accent);
+}
+.view-swatch.active {
+  color: var(--text);
+}
+.view-swatch:focus-visible {
+  outline: none;
+}
+.view-swatch:focus-visible svg {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}

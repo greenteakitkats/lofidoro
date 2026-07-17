@@ -1,15 +1,15 @@
+import { useMemo, useState } from 'react'
 import { useSpotify } from '../spotify/useSpotify'
 import { usePlaylists } from '../spotify/usePlaylists'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import { STORAGE_KEYS, SPOTIFY_CLIENT_ID } from '../config'
 import type { SpotifyPlaylist } from '../spotify/api'
-import './panels.css'
 import './spotify-panel.css'
 
 const MODE_COPY: Record<string, string> = {
   connecting: 'connecting…',
-  error: 'something went wrong',
-  'no-device': 'no active device — open Spotify on your phone or computer first',
+  error: 'something went wrong — try reconnecting',
+  'no-device': 'open Spotify on your phone or computer to control it here',
 }
 
 export function SpotifyPanel() {
@@ -19,16 +19,18 @@ export function SpotifyPanel() {
     STORAGE_KEYS.spotifyLastPlaylist,
     '',
   )
+  const [filter, setFilter] = useState('')
+
+  const filteredMine = useMemo(() => {
+    const q = filter.trim().toLowerCase()
+    return q ? mine.filter((p) => p.name.toLowerCase().includes(q)) : mine
+  }, [mine, filter])
 
   if (!SPOTIFY_CLIENT_ID) {
     return (
-      <section className="panel">
-        <h2 className="panel-title">spotify</h2>
-        <p className="panel-note">
-          Not set up yet — register an app at developer.spotify.com and add the client ID to
-          get lo-fi playlists and playback controls here.
-        </p>
-      </section>
+      <p className="drawer-note">
+        Not set up yet — add a Spotify client ID to enable playback controls.
+      </p>
     )
   }
 
@@ -37,83 +39,107 @@ export function SpotifyPanel() {
     spotify.play(`spotify:playlist:${playlist.id}`)
   }
 
-  return (
-    <section className="panel">
-      <h2 className="panel-title">spotify</h2>
-
-      {spotify.mode === 'disconnected' && (
+  if (spotify.mode === 'disconnected') {
+    return (
+      <div className="spotify">
+        <p className="drawer-note">Bring your own music — connect to control playback here.</p>
         <button className="btn btn-primary" onClick={spotify.login}>
           connect spotify
         </button>
+      </div>
+    )
+  }
+
+  const isPlaying = spotify.nowPlaying?.isPlaying ?? false
+
+  return (
+    <div className="spotify">
+      {MODE_COPY[spotify.mode] && <p className="drawer-note">{MODE_COPY[spotify.mode]}</p>}
+      {spotify.mode === 'remote' && (
+        <p className="drawer-note">free account — controlling your other device</p>
       )}
 
-      {spotify.mode !== 'disconnected' && (
-        <>
-          {MODE_COPY[spotify.mode] && <p className="panel-note">{MODE_COPY[spotify.mode]}</p>}
-          {spotify.mode === 'remote' && (
-            <p className="panel-note">
-              free account: controlling playback on your other device
-            </p>
+      {spotify.nowPlaying && (
+        <div className="now-playing">
+          {spotify.nowPlaying.albumArt ? (
+            <img src={spotify.nowPlaying.albumArt} alt="" className="now-playing-art" />
+          ) : (
+            <div className="now-playing-art now-playing-art--empty" />
           )}
-
-          {spotify.nowPlaying && (
-            <div className="now-playing">
-              {spotify.nowPlaying.albumArt && (
-                <img src={spotify.nowPlaying.albumArt} alt="" className="now-playing-art" />
-              )}
-              <div>
-                <div className="now-playing-track">{spotify.nowPlaying.name}</div>
-                <div className="now-playing-artist">{spotify.nowPlaying.artist}</div>
-              </div>
-            </div>
-          )}
-
-          <div className="spotify-controls">
-            <button className="btn" onClick={spotify.skipPrevious} aria-label="previous track">
-              ⏮
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={() => (spotify.nowPlaying?.isPlaying ? spotify.pause() : spotify.play())}
-            >
-              {spotify.nowPlaying?.isPlaying ? 'pause' : 'play'}
-            </button>
-            <button className="btn" onClick={spotify.skipNext} aria-label="next track">
-              ⏭
-            </button>
+          <div className="now-playing-meta">
+            <div className="now-playing-track">{spotify.nowPlaying.name}</div>
+            <div className="now-playing-artist">{spotify.nowPlaying.artist}</div>
           </div>
-
-          {(curated.length > 0 || mine.length > 0) && (
-            <div className="playlist-sections">
-              {curated.length > 0 && (
-                <div>
-                  <h3 className="playlist-heading">lo-fi picks</h3>
-                  <div className="playlist-grid">
-                    {curated.map((p) => (
-                      <PlaylistTile key={p.id} playlist={p} active={p.id === lastPlaylistId} onClick={() => playTrack(p)} />
-                    ))}
-                  </div>
-                </div>
-              )}
-              {mine.length > 0 && (
-                <div>
-                  <h3 className="playlist-heading">your playlists</h3>
-                  <div className="playlist-grid">
-                    {mine.map((p) => (
-                      <PlaylistTile key={p.id} playlist={p} active={p.id === lastPlaylistId} onClick={() => playTrack(p)} />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          <button className="btn disconnect-btn" onClick={spotify.disconnect}>
-            disconnect
-          </button>
-        </>
+        </div>
       )}
-    </section>
+
+      <div className="transport">
+        <button className="icon-btn" onClick={spotify.skipPrevious} aria-label="previous track">
+          <TransportIcon kind="prev" />
+        </button>
+        <button
+          className="icon-btn icon-btn--primary"
+          onClick={() => (isPlaying ? spotify.pause() : spotify.play())}
+          aria-label={isPlaying ? 'pause' : 'play'}
+        >
+          <TransportIcon kind={isPlaying ? 'pause' : 'play'} />
+        </button>
+        <button className="icon-btn" onClick={spotify.skipNext} aria-label="next track">
+          <TransportIcon kind="next" />
+        </button>
+      </div>
+
+      {curated.length > 0 && (
+        <section className="playlist-section">
+          <h3 className="group-title">lo-fi picks</h3>
+          <div className="playlist-grid">
+            {curated.map((p) => (
+              <PlaylistTile key={p.id} playlist={p} active={p.id === lastPlaylistId} onClick={() => playTrack(p)} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {mine.length > 0 && (
+        <section className="playlist-section">
+          <div className="playlist-section-head">
+            <h3 className="group-title">your playlists</h3>
+            {mine.length > 8 && (
+              <input
+                className="playlist-filter"
+                type="search"
+                placeholder="filter…"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                aria-label="filter your playlists"
+              />
+            )}
+          </div>
+          <div className="playlist-scroll">
+            <div className="playlist-grid">
+              {filteredMine.map((p) => (
+                <PlaylistTile key={p.id} playlist={p} active={p.id === lastPlaylistId} onClick={() => playTrack(p)} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <button className="text-btn" onClick={spotify.disconnect}>
+        disconnect
+      </button>
+    </div>
+  )
+}
+
+function TransportIcon({ kind }: { kind: 'prev' | 'next' | 'play' | 'pause' }) {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+      {kind === 'play' && <path d="M8 5.5v13l11-6.5z" />}
+      {kind === 'pause' && <path d="M7 5.5h3.5v13H7zM13.5 5.5H17v13h-3.5z" />}
+      {kind === 'prev' && <path d="M8 6v12H6V6zM18 6v12l-9-6z" />}
+      {kind === 'next' && <path d="M16 6v12h2V6zM6 6v12l9-6z" />}
+    </svg>
   )
 }
 

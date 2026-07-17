@@ -1,54 +1,49 @@
-import { useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { SettingsProvider, useSettings } from './state/SettingsContext'
-import { TimerProvider, useTimer } from './state/TimerContext'
+import { TimerProvider } from './state/TimerContext'
 import { RoomScene } from './components/Room/RoomScene'
 import { Controls } from './components/Controls'
 import { SettingsPanel } from './components/SettingsPanel'
 import { MixerPanel } from './components/MixerPanel'
 import { SpotifyPanel } from './components/SpotifyPanel'
+import { WindowViewPicker } from './components/WindowViewPicker'
+import { Drawer } from './components/Drawer'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { useAmbience } from './audio/useAmbience'
-import { setDucked } from './audio/mixer'
+import { useBreakAudio } from './hooks/useBreakAudio'
 import { SpotifyProvider, useSpotify } from './spotify/useSpotify'
 import { useLocalStorage } from './hooks/useLocalStorage'
-import { WindowViewPicker } from './components/WindowViewPicker'
-import { DEFAULT_VIEW, isWindowViewId, type WindowViewId } from './components/Room/views'
-import { STORAGE_KEYS } from './config'
+import { DEFAULT_VIEW, WINDOW_VIEWS, isWindowViewId, type WindowViewId } from './components/Room/views'
+import { AMBIENCE_LAYERS, PRESETS, CUSTOM_PRESET_ID, STORAGE_KEYS } from './config'
+
+type DrawerId = 'sound' | 'spotify' | 'window' | 'timer'
 
 function CozyRoom() {
   const { settings } = useSettings()
-  const { state } = useTimer()
   const { mix, setVolume, rainActive, thunderActive, lofiActive } = useAmbience()
   const spotify = useSpotify()
   const [storedView, setView] = useLocalStorage<WindowViewId>(STORAGE_KEYS.windowView, DEFAULT_VIEW)
   const view = isWindowViewId(storedView) ? storedView : DEFAULT_VIEW
+  const [open, setOpen] = useState<DrawerId | null>(null)
 
-  const onBreak = state.status === 'running' && state.phase !== 'focus'
-  // only act on spotify if lofidoro actually found something playing (avoid
-  // surprising a user who wasn't using spotify at all)
-  const wasPlayingRef = useRef(false)
+  // one place drives all break-time audio behavior (fade, duck, pause)
+  useBreakAudio(spotify)
 
-  useEffect(() => {
-    if (settings.breakAudio === 'duck') {
-      setDucked(onBreak)
-    } else {
-      setDucked(false)
-    }
-  }, [settings.breakAudio, onBreak])
+  const toggle = (id: DrawerId) => setOpen((prev) => (prev === id ? null : id))
 
-  useEffect(() => {
-    if (!spotify.connected || settings.breakAudio === 'nothing') return
-    if (onBreak) {
-      wasPlayingRef.current = spotify.nowPlaying?.isPlaying ?? false
-      if (!wasPlayingRef.current) return
-      if (settings.breakAudio === 'pause') spotify.pause()
-      else if (settings.breakAudio === 'duck' && spotify.canDuck) spotify.setVolume(35)
-    } else if (wasPlayingRef.current) {
-      if (settings.breakAudio === 'pause') spotify.play()
-      else if (settings.breakAudio === 'duck' && spotify.canDuck) spotify.setVolume(80)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onBreak])
+  const activeLayers = AMBIENCE_LAYERS.filter((l) => mix[l.id] > 0).length
+  const viewLabel = WINDOW_VIEWS.find((v) => v.id === view)?.label ?? ''
+  const preset = PRESETS.find((p) => p.id === settings.presetId)
+  const timerHint =
+    settings.presetId === CUSTOM_PRESET_ID || !preset
+      ? `${settings.custom.focus}/${settings.custom.shortBreak}`
+      : `${preset.intervals.focus}/${preset.intervals.shortBreak}`
+  const spotifyHint =
+    spotify.mode === 'sdk' || spotify.mode === 'remote'
+      ? (spotify.nowPlaying?.name ?? 'connected')
+      : spotify.mode === 'connecting'
+        ? 'connecting…'
+        : ''
 
   return (
     <>
@@ -59,14 +54,46 @@ function CozyRoom() {
         music={(spotify.nowPlaying?.isPlaying ?? false) || lofiActive}
       />
       <Controls />
-      <WindowViewPicker view={view} setView={setView} />
-      <MixerPanel mix={mix} setVolume={setVolume} />
-      {/* Spotify is optional and less-tested than the core room — if it
-          misbehaves, the timer/room/ambience above must keep working. */}
-      <ErrorBoundary fallbackLabel="Spotify hit a snag">
-        <SpotifyPanel />
-      </ErrorBoundary>
-      <SettingsPanel />
+
+      <div className="drawers">
+        <Drawer
+          label="sound"
+          hint={activeLayers ? `${activeLayers} playing` : ''}
+          open={open === 'sound'}
+          onToggle={() => toggle('sound')}
+        >
+          <MixerPanel mix={mix} setVolume={setVolume} />
+        </Drawer>
+
+        <Drawer
+          label="music"
+          hint={spotifyHint}
+          open={open === 'spotify'}
+          onToggle={() => toggle('spotify')}
+        >
+          <ErrorBoundary fallbackLabel="Spotify hit a snag">
+            <SpotifyPanel />
+          </ErrorBoundary>
+        </Drawer>
+
+        <Drawer
+          label="window"
+          hint={viewLabel}
+          open={open === 'window'}
+          onToggle={() => toggle('window')}
+        >
+          <WindowViewPicker view={view} setView={setView} />
+        </Drawer>
+
+        <Drawer
+          label="timer"
+          hint={timerHint}
+          open={open === 'timer'}
+          onToggle={() => toggle('timer')}
+        >
+          <SettingsPanel />
+        </Drawer>
+      </div>
     </>
   )
 }

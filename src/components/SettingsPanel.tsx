@@ -1,8 +1,8 @@
-import { CUSTOM_PRESET_ID, MAX_MINUTES, MIN_MINUTES, PRESETS } from '../config'
+import type { CSSProperties } from 'react'
+import { CUSTOM_PRESET_ID, MAX_FADE_LEAD, MAX_MINUTES, MIN_MINUTES, PRESETS } from '../config'
 import { useSettings } from '../state/SettingsContext'
 import { useNotifications } from '../hooks/useNotifications'
 import type { BreakAudioBehavior, Intervals } from '../types'
-import './panels.css'
 
 const BREAK_AUDIO_OPTIONS: Array<{ value: BreakAudioBehavior; label: string }> = [
   { value: 'pause', label: 'pause' },
@@ -36,9 +36,9 @@ export function SettingsPanel() {
   }
 
   return (
-    <section className="panel">
-      <h2 className="panel-title">timer</h2>
-      <div className="preset-row">
+    <div className="settings">
+      <h3 className="group-title">intervals</h3>
+      <div className="chip-row">
         {PRESETS.map((p) => (
           <button
             key={p.id}
@@ -115,8 +115,8 @@ export function SettingsPanel() {
         </label>
       </div>
 
-      <h2 className="panel-title panel-title-spaced">on a break, music & ambience should</h2>
-      <div className="preset-row">
+      <h3 className="group-title spaced">on a break, music &amp; ambience</h3>
+      <div className="chip-row">
         {BREAK_AUDIO_OPTIONS.map((opt) => (
           <button
             key={opt.value}
@@ -127,6 +127,26 @@ export function SettingsPanel() {
           </button>
         ))}
       </div>
-    </section>
+
+      {settings.breakAudio !== 'nothing' && (
+        <label className="fade-field">
+          <span>
+            ease it {settings.breakAudio === 'pause' ? 'out' : 'down'} over{' '}
+            <strong>{settings.fadeLeadSeconds}s</strong> before the break
+          </span>
+          <input
+            className="slider"
+            type="range"
+            min={0}
+            max={MAX_FADE_LEAD}
+            step={1}
+            value={settings.fadeLeadSeconds}
+            style={{ '--fill': `${(settings.fadeLeadSeconds / MAX_FADE_LEAD) * 100}%` } as CSSProperties}
+            onChange={(e) => update({ fadeLeadSeconds: Number(e.target.value) })}
+            aria-label="fade lead time in seconds"
+          />
+        </label>
+      )}
+    </div>
   )
 }

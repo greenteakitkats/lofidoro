@@ -1,18 +1,23 @@
-/* lofidoro global styles — warm, dim, cozy */
+/* lofidoro — warm, dim, unhurried */
 
 :root {
-  /* room palette (time-of-day tints override --ambient via inline style) */
-  --bg: #241d2b;
-  --bg-soft: #2e2537;
-  --panel: #322940;
-  --panel-border: #453a55;
-  --text: #efe6da;
-  --text-dim: #b3a7c2;
-  --accent: #e8b88a;   /* warm lamp amber */
-  --accent-2: #c9a7d8; /* dusty lavender */
-  --focus-ring: #e8b88a88;
+  /* palette */
+  --bg: #221b28;
+  --bg-soft: #2b2333;
+  --text: #f0e7db;      /* warm cream */
+  --text-dim: #a99fb8;
+  --text-faint: #7a7188;
+  --accent: #e6b483;    /* lamp amber */
+  --accent-2: #c9a7d8;  /* dusty lavender */
+  --hairline: rgba(255, 255, 255, 0.07);
+  --surface: rgba(255, 255, 255, 0.035);
+  --surface-hover: rgba(255, 255, 255, 0.06);
+  --focus-ring: rgba(230, 180, 131, 0.55);
 
-  font-family: 'Avenir Next', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --serif: 'Hoefler Text', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  --sans: 'Avenir Next', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  font-family: var(--sans);
   color-scheme: dark;
 }
 
@@ -23,56 +28,63 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    radial-gradient(120% 90% at 50% 0%, var(--bg-soft) 0%, var(--bg) 70%);
+  background: radial-gradient(130% 100% at 50% -10%, var(--bg-soft) 0%, var(--bg) 65%);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 #root {
-  max-width: 900px;
+  max-width: 680px;
   margin: 0 auto;
-  padding: 24px 16px 64px;
+  padding: 30px 18px 80px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 22px;
 }
 
+/* header — quiet serif wordmark, centered */
 .app-header {
   display: flex;
-  align-items: baseline;
-  gap: 10px;
-  align-self: flex-start;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 2px;
 }
 
 .app-title {
   margin: 0;
-  font-size: 1.3rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--accent);
+  font-family: var(--serif);
+  font-size: 1.7rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--text);
 }
 
 .app-tagline {
-  color: var(--text-dim);
-  font-size: 0.85rem;
+  color: var(--text-faint);
+  font-size: 0.82rem;
+  font-style: italic;
+  font-family: var(--serif);
 }
 
+/* buttons */
 .btn {
-  border: 1px solid var(--panel-border);
-  background: var(--panel);
+  border: 1px solid var(--hairline);
+  background: var(--surface);
   color: var(--text);
-  border-radius: 12px;
-  padding: 10px 20px;
-  font-size: 0.95rem;
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.92rem;
   font-family: inherit;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.08s ease;
+  transition: background 0.18s ease, transform 0.08s ease, border-color 0.18s ease;
 }
 
 .btn:hover {
-  background: var(--panel-border);
+  background: var(--surface-hover);
+  border-color: var(--accent);
 }
 
 .btn:active {
@@ -89,11 +101,137 @@ body {
   border-color: var(--accent);
   color: #3a2b1c;
   font-weight: 600;
-  min-width: 108px;
 }
 
 .btn-primary:hover {
-  background: #f0c79f;
+  background: #efc79c;
+  border-color: #efc79c;
+}
+
+/* a bare, low-key text action (disconnect, etc.) */
+.text-btn {
+  align-self: center;
+  background: none;
+  border: none;
+  color: var(--text-faint);
+  font-family: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.15s ease;
+}
+.text-btn:hover {
+  color: var(--text-dim);
+}
+
+/* round icon buttons (transport) */
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.08s ease;
+}
+.icon-btn:hover {
+  background: var(--surface-hover);
+  border-color: var(--accent);
+}
+.icon-btn:active {
+  transform: scale(0.94);
+}
+.icon-btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.icon-btn--primary {
+  width: 52px;
+  height: 52px;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #3a2b1c;
+}
+.icon-btn--primary:hover {
+  background: #efc79c;
+  border-color: #efc79c;
+}
+
+/* small lowercase section label */
+.group-title {
+  margin: 0 0 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.group-title.spaced {
+  margin-top: 22px;
+}
+
+/* shared range slider — thin track, small warm thumb, filled portion */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 18px;
+  background: transparent;
+  cursor: pointer;
+  --fill: 0%;
+}
+.slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--accent) 0%,
+    var(--accent) var(--fill),
+    var(--hairline) var(--fill),
+    var(--hairline) 100%
+  );
+}
+.slider::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--hairline);
+}
+.slider::-moz-range-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: #f3ddc2;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 0.1s ease;
+}
+.slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #f3ddc2;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+.slider:hover::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+.slider:focus-visible {
+  outline: none;
+}
+.slider:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px var(--focus-ring);
 }
 
 .crash-fallback {
@@ -107,7 +245,9 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

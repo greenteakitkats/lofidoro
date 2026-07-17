@@ -27,10 +27,12 @@ export const DEFAULT_SETTINGS: Settings = {
   notifications: false,
   chime: true,
   breakAudio: 'duck',
+  fadeLeadSeconds: 15,
 }
 
 export const MIN_MINUTES = 1
 export const MAX_MINUTES = 120
+export const MAX_FADE_LEAD = 60
 
 export interface AmbienceLayerDef {
   id: AmbienceLayerId

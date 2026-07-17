@@ -21,7 +21,8 @@ interface Layer {
 const SMOOTHING = 0.08
 
 let master: GainNode | null = null
-let ducked = false
+// 1 = full, 0.35 ≈ ducked, 0 = silenced during breaks (set by useBreakAudio)
+let focusLevel = 1
 const layers = new Map<AmbienceLayerId, Layer>()
 const volumes: AmbienceMix = {
   lofi: 0,
@@ -40,7 +41,7 @@ const volumes: AmbienceMix = {
 function ensureMaster(ctx: AudioContext): GainNode {
   if (!master) {
     master = ctx.createGain()
-    master.gain.value = ducked ? 0.55 : 1
+    master.gain.value = focusLevel
     master.connect(ctx.destination)
   }
   return master
@@ -89,12 +90,18 @@ export function applyPrimedMix(): void {
   }
 }
 
-/** Gently lower everything during breaks (when the duck setting is on). */
-export function setDucked(next: boolean): void {
-  ducked = next
+/**
+ * Set the overall ambience level (0..1) — the break-audio system rides this
+ * down before/through breaks and back up on focus. Smoothly ramped so the
+ * pre-break fade is inaudible-of-seam. Idempotent: no-op if unchanged.
+ */
+export function setFocusAudioLevel(level: number, rampSeconds = 0.5): void {
+  const clamped = Math.min(1, Math.max(0, level))
+  if (clamped === focusLevel) return
+  focusLevel = clamped
   const ctx = getAudioContext()
   if (!ctx || !master) return
-  master.gain.setTargetAtTime(next ? 0.55 : 1, ctx.currentTime, 0.4)
+  master.gain.setTargetAtTime(clamped, ctx.currentTime, rampSeconds)
 }
 
 export function getVolumes(): AmbienceMix {

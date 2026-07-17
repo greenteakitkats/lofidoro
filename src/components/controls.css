@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .controls-session {
@@ -12,11 +12,12 @@
 }
 
 .session-dot {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   border: 1.5px solid var(--accent-2);
-  opacity: 0.55;
+  opacity: 0.4;
+  transition: opacity 0.4s ease, background 0.4s ease;
 }
 
 .session-dot.filled {
@@ -26,10 +27,11 @@
 }
 
 .controls-phase {
-  margin-left: 8px;
-  color: var(--text-dim);
+  margin-left: 10px;
+  color: var(--text-faint);
+  font-family: var(--serif);
+  font-style: italic;
   font-size: 0.85rem;
-  letter-spacing: 0.06em;
 }
 
 .controls-buttons {

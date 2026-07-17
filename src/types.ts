@@ -24,6 +24,8 @@ export interface Settings {
   notifications: boolean
   chime: boolean
   breakAudio: BreakAudioBehavior
+  /** seconds to ease music/ambience down before a break (0 = only at the break) */
+  fadeLeadSeconds: number
 }
 
 export type AmbienceLayerId =
