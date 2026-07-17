@@ -10,6 +10,13 @@
   font-style: normal;
 }
 
+.spotify-remote {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
 .now-playing {
   display: flex;
   align-items: center;

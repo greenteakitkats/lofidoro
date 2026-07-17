@@ -32,7 +32,11 @@ export interface SpotifyApi {
   errorMessage: string | null
   /** transient feedback for a control action (e.g. "open Spotify somewhere first") */
   statusMessage: string | null
+  /** true once premium is confirmed and in-browser playback is possible */
+  canPlayInBrowser: boolean
   login: () => void
+  /** opt in to in-browser playback (premium; may prompt for DRM) */
+  enableInBrowser: () => void
   disconnect: () => void
   play: (contextUri?: string) => void
   pause: () => void
@@ -75,6 +79,33 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const playerRef = useRef<PlayerHandle | null>(null)
 
+  const isPremiumRef = useRef(false)
+
+  // spin up the Web Playback SDK — the in-browser device that lets us play
+  // without any other Spotify app running. Premium-only, unsupported on iOS,
+  // and needs EME/DRM (which may prompt in Firefox). Returns success.
+  const startSdk = useCallback(async (): Promise<boolean> => {
+    if (!isPremiumRef.current || isIOS()) return false
+    try {
+      const handle = await createPlayer()
+      playerRef.current = handle
+      await api.transferPlayback(handle.deviceId)
+      handle.instance.addListener('player_state_changed', ({ state }) => {
+        const np = toNowPlaying(state)
+        if (np) setNowPlaying(np)
+      })
+      const current = await handle.instance.getCurrentState().catch(() => null)
+      const np = toNowPlaying(current)
+      if (np) setNowPlaying(np)
+      setMode('sdk')
+      setStatusMessage(null)
+      return true
+    } catch {
+      playerRef.current = null
+      return false
+    }
+  }, [])
+
   const connect = useCallback(async () => {
     if (!SPOTIFY_CLIENT_ID) {
       setErrorMessage('Spotify isn’t configured yet.')
@@ -85,33 +116,32 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
     try {
       const profile = await api.getProfile()
       if (!profile) throw new Error('could not load profile')
+      isPremiumRef.current = profile.product === 'premium'
 
-      if (profile.product === 'premium' && !isIOS() && (await hasEmeSupport())) {
-        try {
-          const handle = await createPlayer()
-          playerRef.current = handle
-          await api.transferPlayback(handle.deviceId)
-          handle.instance.addListener('player_state_changed', ({ state }) => {
-            const np = toNowPlaying(state)
-            if (np) setNowPlaying(np)
-          })
-          // populate now-playing immediately; state_changed only fires on changes
-          const current = await handle.instance.getCurrentState().catch(() => null)
-          const np = toNowPlaying(current)
-          if (np) setNowPlaying(np)
-          setMode('sdk')
-          return
-        } catch {
-          // SDK failed or timed out — degrade to remote-control mode
-          playerRef.current = null
-        }
+      // only auto-attempt the SDK when EME is already available, so we don't
+      // surprise Firefox users with a DRM prompt on connect — they can opt in
+      // via "play in this browser" instead
+      if (isPremiumRef.current && !isIOS() && (await hasEmeSupport())) {
+        if (await startSdk()) return
       }
       setMode('remote')
     } catch {
       setMode('error')
       setErrorMessage('Could not connect to Spotify. Try reconnecting.')
     }
-  }, [])
+  }, [startSdk])
+
+  // user-initiated: turn on in-browser playback (may trigger the DRM prompt)
+  const enableInBrowser = useCallback(async () => {
+    if (mode === 'sdk') return
+    if (!isPremiumRef.current) {
+      setStatusMessage('In-browser playback needs Spotify Premium.')
+      return
+    }
+    setStatusMessage('starting in-browser playback…')
+    const ok = await startSdk()
+    if (!ok) setStatusMessage('Couldn’t start in-browser playback (DRM may be blocked).')
+  }, [mode, startSdk])
 
   // on mount (StrictMode-safe): finish PKCE redirect, then connect if logged in
   const bootedRef = useRef(false)
@@ -242,7 +272,9 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
     nowPlaying,
     errorMessage,
     statusMessage,
+    canPlayInBrowser: isPremiumRef.current && mode !== 'sdk' && !isIOS(),
     login,
+    enableInBrowser: () => void enableInBrowser(),
     disconnect,
     play,
     pause: pausePlayback,

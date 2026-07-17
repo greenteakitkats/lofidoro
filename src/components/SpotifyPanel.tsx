@@ -9,7 +9,6 @@ import './spotify-panel.css'
 const MODE_COPY: Record<string, string> = {
   connecting: 'connecting…',
   error: 'something went wrong — try reconnecting',
-  'no-device': 'open Spotify on your phone or computer to control it here',
 }
 
 export function SpotifyPanel() {
@@ -55,12 +54,22 @@ export function SpotifyPanel() {
   return (
     <div className="spotify">
       {MODE_COPY[spotify.mode] && <p className="drawer-note">{MODE_COPY[spotify.mode]}</p>}
-      {spotify.mode === 'remote' && (
-        <p className="drawer-note">
-          controlling Spotify on your other device — start it playing there, then use these
-          controls
-        </p>
+
+      {(spotify.mode === 'remote' || spotify.mode === 'no-device') && (
+        <div className="spotify-remote">
+          <p className="drawer-note">
+            {spotify.canPlayInBrowser
+              ? 'Play right here in the browser, or control Spotify already running on another device.'
+              : 'Controlling Spotify on your other device — start something playing there, then use these controls.'}
+          </p>
+          {spotify.canPlayInBrowser && (
+            <button className="btn" onClick={spotify.enableInBrowser}>
+              play in this browser
+            </button>
+          )}
+        </div>
       )}
+
       {spotify.statusMessage && <p className="drawer-note drawer-note--alert">{spotify.statusMessage}</p>}
 
       {spotify.nowPlaying && (
