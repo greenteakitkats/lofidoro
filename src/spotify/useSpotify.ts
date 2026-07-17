@@ -133,12 +133,13 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
           return
         }
         setMode('remote')
+        // defensive: podcast episodes have no artists, some items no art
         setNowPlaying(
           state.item
             ? {
-                name: state.item.name,
-                artist: state.item.artists.map((a) => a.name).join(', '),
-                albumArt: state.item.album.images[0]?.url ?? null,
+                name: state.item.name ?? 'Unknown',
+                artist: state.item.artists?.map((a) => a.name).join(', ') ?? '',
+                albumArt: state.item.album?.images?.[0]?.url ?? null,
                 isPlaying: state.is_playing,
               }
             : null,

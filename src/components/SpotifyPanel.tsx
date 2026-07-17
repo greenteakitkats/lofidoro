@@ -128,7 +128,7 @@ function PlaylistTile({
 }) {
   return (
     <button className={'playlist-tile' + (active ? ' active' : '')} onClick={onClick} title={playlist.name}>
-      {playlist.images[0] ? (
+      {playlist.images?.[0]?.url ? (
         <img src={playlist.images[0].url} alt="" />
       ) : (
         <div className="playlist-tile-fallback" />

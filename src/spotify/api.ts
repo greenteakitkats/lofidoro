@@ -10,14 +10,20 @@ export interface SpotifyProfile {
 export interface SpotifyPlaylist {
   id: string
   name: string
-  images: Array<{ url: string }>
+  /** null for playlists without cover art — Spotify really does send null */
+  images: Array<{ url: string }> | null
   external_urls: { spotify: string }
 }
 
 export interface PlaybackState {
   is_playing: boolean
   device: { id: string; name: string; volume_percent: number | null } | null
-  item: { name: string; artists: Array<{ name: string }>; album: { images: Array<{ url: string }> } } | null
+  /** artists/album absent for podcast episodes; images can be null */
+  item: {
+    name: string
+    artists?: Array<{ name: string }>
+    album?: { images: Array<{ url: string }> | null }
+  } | null
 }
 
 class SpotifyApiError extends Error {

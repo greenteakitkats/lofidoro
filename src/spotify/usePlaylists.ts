@@ -20,8 +20,10 @@ export function usePlaylists(connected: boolean) {
       getMyPlaylists().catch(() => null),
     ]).then(([curatedResults, mineResult]) => {
       if (cancelled) return
-      setCurated(curatedResults.filter((p): p is SpotifyPlaylist => p !== null))
-      setMine(mineResult?.items ?? [])
+      // Spotify's playlist endpoints really do return null entries in
+      // `items` (and null `images`) — filter aggressively before render
+      setCurated(curatedResults.filter((p): p is SpotifyPlaylist => Boolean(p?.id)))
+      setMine((mineResult?.items ?? []).filter((p): p is SpotifyPlaylist => Boolean(p?.id)))
       setLoading(false)
     })
     return () => {
