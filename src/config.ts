@@ -61,8 +61,7 @@ export const AMBIENCE_GROUPS: Array<{ id: AmbienceGroup; label: string }> = [
 ]
 
 // Spotify — client ID is public by design in the PKCE flow.
-// Filled in during Phase 4 once the app is registered at developer.spotify.com.
-export const SPOTIFY_CLIENT_ID = ''
+export const SPOTIFY_CLIENT_ID = 'a4245622a3bf404fbebeb4b2c0dba858'
 export const SPOTIFY_SCOPES =
   'streaming user-read-private user-read-playback-state user-modify-playback-state playlist-read-private'
 

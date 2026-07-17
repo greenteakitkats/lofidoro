@@ -38,9 +38,10 @@ Spotify integration needs an app registered at
 
 1. Create an app, note the **Client ID**.
 2. Add redirect URIs for both environments — exact match, trailing slash
-   included:
-   - `https://greenteakitkats.github.io/lofidoro/`
-   - `http://127.0.0.1:5173/` (Spotify rejects plain `localhost`)
+   and subpath included (the app uses its own URL as the redirect):
+   - `https://ryantdo.com/lofidoro/` (the custom domain is the real
+     runtime origin, not greenteakitkats.github.io)
+   - `http://127.0.0.1:5173/lofidoro/` (Spotify rejects plain `localhost`)
 3. Paste the client ID into `src/config.ts` (`SPOTIFY_CLIENT_ID`), and
    add a few playlist IDs to `CURATED_PLAYLIST_IDS` if you want curated
    picks.
