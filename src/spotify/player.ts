@@ -13,6 +13,28 @@ export function isIOS(): boolean {
   return /iP(hone|ad|od)/.test(navigator.userAgent)
 }
 
+/**
+ * The Web Playback SDK requires EME (Widevine) for licensed playback. When
+ * it's unavailable or disabled — common in Firefox until the user opts in
+ * to DRM — attempting the SDK anyway surfaces a browser DRM permission
+ * prompt and, worse, was crashing the page. Feature-detect first and skip
+ * straight to remote-control mode when it's not there.
+ */
+export async function hasEmeSupport(): Promise<boolean> {
+  if (!navigator.requestMediaKeySystemAccess) return false
+  try {
+    await navigator.requestMediaKeySystemAccess('com.widevine.alpha', [
+      {
+        initDataTypes: ['cenc'],
+        audioCapabilities: [{ contentType: 'audio/mp4;codecs="mp4a.40.2"' }],
+      },
+    ])
+    return true
+  } catch {
+    return false
+  }
+}
+
 function loadSdk(): Promise<void> {
   if (sdkLoadPromise) return sdkLoadPromise
   sdkLoadPromise = new Promise((resolve, reject) => {

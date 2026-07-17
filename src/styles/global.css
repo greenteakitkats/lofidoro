@@ -96,6 +96,16 @@ body {
   background: #f0c79f;
 }
 
+.crash-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 28px 20px;
+  color: var(--text-dim);
+  text-align: center;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

@@ -6,6 +6,7 @@ import { Controls } from './components/Controls'
 import { SettingsPanel } from './components/SettingsPanel'
 import { MixerPanel } from './components/MixerPanel'
 import { SpotifyPanel } from './components/SpotifyPanel'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { useAmbience } from './audio/useAmbience'
 import { setDucked } from './audio/mixer'
 import { SpotifyProvider, useSpotify } from './spotify/useSpotify'
@@ -60,7 +61,11 @@ function CozyRoom() {
       <Controls />
       <WindowViewPicker view={view} setView={setView} />
       <MixerPanel mix={mix} setVolume={setVolume} />
-      <SpotifyPanel />
+      {/* Spotify is optional and less-tested than the core room — if it
+          misbehaves, the timer/room/ambience above must keep working. */}
+      <ErrorBoundary fallbackLabel="Spotify hit a snag">
+        <SpotifyPanel />
+      </ErrorBoundary>
       <SettingsPanel />
     </>
   )

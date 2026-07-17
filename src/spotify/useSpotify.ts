@@ -10,7 +10,7 @@ import {
 } from 'react'
 import * as auth from './auth'
 import * as api from './api'
-import { createPlayer, isIOS, type PlayerHandle } from './player'
+import { createPlayer, hasEmeSupport, isIOS, type PlayerHandle } from './player'
 import { SPOTIFY_CLIENT_ID, STORAGE_KEYS } from '../config'
 import { loadJSON } from '../hooks/useLocalStorage'
 
@@ -42,12 +42,19 @@ const POLL_MS = 5000
 
 const SpotifyContext = createContext<SpotifyApi | null>(null)
 
-function toNowPlaying(state: SpotifyPlaybackState): NowPlaying {
-  const track = state.track_window.current_track
+/**
+ * Defensive by design: this is fed by the SDK's own event callbacks, which
+ * run outside React's render cycle — a throw here becomes an unhandled
+ * error rather than something an ErrorBoundary can catch, so we tolerate
+ * missing/malformed fields instead of assuming the shape is always intact.
+ */
+function toNowPlaying(state: SpotifyPlaybackState | null | undefined): NowPlaying | null {
+  const track = state?.track_window?.current_track
+  if (!track) return null
   return {
-    name: track.name,
-    artist: track.artists.map((a) => a.name).join(', '),
-    albumArt: track.album.images[0]?.url ?? null,
+    name: track.name ?? 'Unknown track',
+    artist: track.artists?.map((a) => a.name).join(', ') ?? '',
+    albumArt: track.album?.images?.[0]?.url ?? null,
     isPlaying: !state.paused,
   }
 }
@@ -75,17 +82,19 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
       const profile = await api.getProfile()
       if (!profile) throw new Error('could not load profile')
 
-      if (profile.product === 'premium' && !isIOS()) {
+      if (profile.product === 'premium' && !isIOS() && (await hasEmeSupport())) {
         try {
           const handle = await createPlayer()
           playerRef.current = handle
           await api.transferPlayback(handle.deviceId)
           handle.instance.addListener('player_state_changed', ({ state }) => {
-            if (state) setNowPlaying(toNowPlaying(state))
+            const np = toNowPlaying(state)
+            if (np) setNowPlaying(np)
           })
           // populate now-playing immediately; state_changed only fires on changes
-          const current = await handle.instance.getCurrentState()
-          if (current) setNowPlaying(toNowPlaying(current))
+          const current = await handle.instance.getCurrentState().catch(() => null)
+          const np = toNowPlaying(current)
+          if (np) setNowPlaying(np)
           setMode('sdk')
           return
         } catch {
