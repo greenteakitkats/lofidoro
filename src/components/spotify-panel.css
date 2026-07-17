@@ -5,6 +5,11 @@
   align-items: flex-start;
 }
 
+.drawer-note--alert {
+  color: var(--accent);
+  font-style: normal;
+}
+
 .now-playing {
   display: flex;
   align-items: center;

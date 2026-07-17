@@ -31,6 +31,8 @@ interface SpotifyPlayerInstance {
   previousTrack: () => Promise<void>
   setVolume: (v: number) => Promise<void>
   getCurrentState: () => Promise<SpotifyPlaybackState | null>
+  /** unlock audio output on browsers that need a gesture (mobile Safari) */
+  activateElement?: () => Promise<void>
 }
 
 interface Window {

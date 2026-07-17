@@ -98,41 +98,78 @@ function fire(ctx: AudioContext): AudioBuffer {
 }
 
 /** café murmur: warm room-tone with slow voice-like swells and rare cup clinks */
+/**
+ * A quiet coffee shop. You can't fake human chatter with noise (that's what
+ * read as nonsensical static before), so this leans on the *recognizable*,
+ * synthesizable sounds of a café: a warm low room tone, a soft distant
+ * hubbub kept well down so it sits behind everything, an espresso steam
+ * hiss, cup/saucer clinks, and a spoon stir.
+ */
 function cafe(ctx: AudioContext): AudioBuffer {
-  return noiseBuffer(ctx, 11.7, (data, sr, ch) => {
-    // room tone
+  const seconds = 11.7
+  // schedule events once so both channels agree
+  const clinks = Array.from({ length: 4 }, () => ({
+    at: 0.5 + Math.random() * (seconds - 1.5),
+    f: 2200 + Math.random() * 1600,
+  }))
+  const steamAt = 1 + Math.random() * (seconds - 4)
+  const stirAt = seconds * 0.55 + Math.random() * 2
+
+  return noiseBuffer(ctx, seconds, (data, sr, ch) => {
+    // warm room tone (brown noise, dark)
     let last = 0
     for (let i = 0; i < data.length; i++) {
       const white = Math.random() * 2 - 1
       last = (last + 0.02 * white) / 1.02
-      data[i] = last * 3.5
+      data[i] = last * 2.4
     }
-    lowpass(data, sr, 600)
-    // murmur: band-limited noise with slow, irregular amplitude swells
+    lowpass(data, sr, 340)
+
+    // distant hubbub — DARK and LOW so it's a soft presence, not static
     let m1 = 0
     let m2 = 0
     const phase = ch === 0 ? 0 : 1.7
     for (let i = 0; i < data.length; i++) {
       const white = Math.random() * 2 - 1
-      m1 = m1 + 0.09 * (white - m1)
-      m2 = m2 + 0.05 * (m1 - m2)
+      m1 = m1 + 0.06 * (white - m1)
+      m2 = m2 + 0.04 * (m1 - m2)
       const t = i / sr
-      const swell =
-        0.5 +
-        0.5 *
-          Math.sin(t * 0.9 + phase) *
-          Math.sin(t * 0.37 + phase * 2) *
-          Math.sin(t * 1.31)
-      data[i] += (m1 - m2) * 5.5 * swell
+      const swell = 0.4 + 0.6 * Math.abs(Math.sin(t * 0.5 + phase) * Math.sin(t * 0.21 + phase))
+      data[i] += (m1 - m2) * 1.5 * swell
     }
-    // cup clinks: tiny high pings, a couple per loop
-    for (let k = 0; k < 3; k++) {
-      const at = Math.floor(Math.random() * (data.length - 3000))
-      const f = 1800 + Math.random() * 1400
-      for (let i = 0; i < 2500; i++) {
-        data[at + i] += Math.sin((i / sr) * f * 2 * Math.PI) * 0.05 * Math.exp(-i / 500)
+
+    // espresso steam: a ~1.6s hiss (bright noise with a slow attack/decay)
+    {
+      const s0 = Math.floor(steamAt * sr)
+      const n = Math.floor(1.6 * sr)
+      let h = 0
+      for (let i = 0; i < n && s0 + i < data.length; i++) {
+        const t = i / n
+        const env = Math.sin(t * Math.PI) ** 1.4 // gentle swell
+        h = h * 0.6 + (Math.random() * 2 - 1) * 0.4 // lightly-correlated hiss
+        data[s0 + i] += h * 0.14 * env
       }
     }
+
+    // cup / saucer clinks
+    for (const c of clinks) {
+      const at = Math.floor(c.at * sr)
+      for (let i = 0; i < 2500 && at + i < data.length; i++) {
+        data[at + i] += Math.sin((i / sr) * c.f * 2 * Math.PI) * 0.045 * Math.exp(-i / 520)
+      }
+    }
+
+    // spoon stir: a quick ring of soft ticks
+    {
+      const s0 = Math.floor(stirAt * sr)
+      for (let k = 0; k < 6; k++) {
+        const at = s0 + Math.floor(k * 0.085 * sr)
+        for (let i = 0; i < 500 && at + i < data.length; i++) {
+          data[at + i] += (Math.random() * 2 - 1) * 0.05 * Math.exp(-i / 90)
+        }
+      }
+    }
+
     makeSeamless(data, sr)
     normalize(data, 0.5)
   })

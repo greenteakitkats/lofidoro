@@ -10,6 +10,7 @@ import {
 } from 'react'
 import * as auth from './auth'
 import * as api from './api'
+import { SpotifyApiError } from './api'
 import { createPlayer, hasEmeSupport, isIOS, type PlayerHandle } from './player'
 import { SPOTIFY_CLIENT_ID, STORAGE_KEYS } from '../config'
 import { loadJSON } from '../hooks/useLocalStorage'
@@ -29,6 +30,8 @@ export interface SpotifyApi {
   canDuck: boolean
   nowPlaying: NowPlaying | null
   errorMessage: string | null
+  /** transient feedback for a control action (e.g. "open Spotify somewhere first") */
+  statusMessage: string | null
   login: () => void
   disconnect: () => void
   play: (contextUri?: string) => void
@@ -69,6 +72,7 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<SpotifyMode>('disconnected')
   const [nowPlaying, setNowPlaying] = useState<NowPlaying | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const playerRef = useRef<PlayerHandle | null>(null)
 
   const connect = useCallback(async () => {
@@ -168,6 +172,23 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
     setNowPlaying(null)
   }, [])
 
+  // run a Web API control action, translating "no active device" into
+  // guidance instead of a silent no-op (the bug where clicking play in
+  // remote mode did nothing because the 404 was swallowed)
+  const runControl = useCallback(async (action: () => Promise<unknown>) => {
+    try {
+      setStatusMessage(null)
+      await action()
+    } catch (e) {
+      if (e instanceof SpotifyApiError && (e.status === 404 || e.status === 403)) {
+        setMode('no-device')
+        setStatusMessage('Open Spotify on your phone or computer, then press play again.')
+      } else {
+        setStatusMessage('Playback command failed — try again in a moment.')
+      }
+    }
+  }, [])
+
   const play = useCallback(
     (contextUri?: string) => {
       // nothing loaded yet and no explicit choice: fall back to the last playlist
@@ -176,30 +197,38 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
         const last = loadJSON<string>(STORAGE_KEYS.spotifyLastPlaylist, '')
         if (last) uri = `spotify:playlist:${last}`
       }
-      if (mode === 'sdk' && playerRef.current) {
-        if (uri) void api.play(playerRef.current.deviceId, uri)
-        else void playerRef.current.instance.resume()
-      } else {
-        void api.play(undefined, uri)
-      }
+      const p = playerRef.current
+      void runControl(async () => {
+        if (mode === 'sdk' && p) {
+          await p.instance.activateElement?.()
+          if (uri) await api.play(p.deviceId, uri)
+          else await p.instance.resume()
+        } else if (uri) {
+          await api.play(undefined, uri) // active device
+        } else {
+          await api.play()
+        }
+        // a successful command means there IS a device again
+        if (mode === 'no-device') setMode('remote')
+      })
     },
-    [mode, nowPlaying],
+    [mode, nowPlaying, runControl],
   )
 
   const pausePlayback = useCallback(() => {
-    if (mode === 'sdk' && playerRef.current) void playerRef.current.instance.pause()
-    else void api.pause()
-  }, [mode])
+    const p = playerRef.current
+    void runControl(() => (mode === 'sdk' && p ? p.instance.pause() : api.pause()))
+  }, [mode, runControl])
 
   const skipNext = useCallback(() => {
-    if (mode === 'sdk' && playerRef.current) void playerRef.current.instance.nextTrack()
-    else void api.next()
-  }, [mode])
+    const p = playerRef.current
+    void runControl(() => (mode === 'sdk' && p ? p.instance.nextTrack() : api.next()))
+  }, [mode, runControl])
 
   const skipPrevious = useCallback(() => {
-    if (mode === 'sdk' && playerRef.current) void playerRef.current.instance.previousTrack()
-    else void api.previous()
-  }, [mode])
+    const p = playerRef.current
+    void runControl(() => (mode === 'sdk' && p ? p.instance.previousTrack() : api.previous()))
+  }, [mode, runControl])
 
   /** True volume ducking — Premium/SDK only; no-op (silently) elsewhere. */
   const setVolume = useCallback((percent: number) => {
@@ -212,6 +241,7 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
     canDuck: mode === 'sdk',
     nowPlaying,
     errorMessage,
+    statusMessage,
     login,
     disconnect,
     play,

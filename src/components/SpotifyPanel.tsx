@@ -56,8 +56,12 @@ export function SpotifyPanel() {
     <div className="spotify">
       {MODE_COPY[spotify.mode] && <p className="drawer-note">{MODE_COPY[spotify.mode]}</p>}
       {spotify.mode === 'remote' && (
-        <p className="drawer-note">free account — controlling your other device</p>
+        <p className="drawer-note">
+          controlling Spotify on your other device — start it playing there, then use these
+          controls
+        </p>
       )}
+      {spotify.statusMessage && <p className="drawer-note drawer-note--alert">{spotify.statusMessage}</p>}
 
       {spotify.nowPlaying && (
         <div className="now-playing">
