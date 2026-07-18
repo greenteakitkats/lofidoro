@@ -83,9 +83,11 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
 
   // spin up the Web Playback SDK — the in-browser device that lets us play
   // without any other Spotify app running. Premium-only, unsupported on iOS,
-  // and needs EME/DRM (which may prompt in Firefox). Returns success.
-  const startSdk = useCallback(async (): Promise<boolean> => {
-    if (!isPremiumRef.current || isIOS()) return false
+  // and needs EME/DRM (which may prompt in Firefox). Returns null on success,
+  // else a user-facing reason so the panel can explain what to fix.
+  const startSdk = useCallback(async (): Promise<string | null> => {
+    if (isIOS()) return 'In-browser playback isn’t supported on iOS browsers.'
+    if (!isPremiumRef.current) return 'In-browser playback needs Spotify Premium.'
     try {
       const handle = await createPlayer()
       playerRef.current = handle
@@ -99,10 +101,21 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
       if (np) setNowPlaying(np)
       setMode('sdk')
       setStatusMessage(null)
-      return true
-    } catch {
+      return null
+    } catch (e) {
       playerRef.current = null
-      return false
+      const raw = (e instanceof Error ? e.message : '').toLowerCase()
+      if (raw.includes('premium') || raw.includes('account')) {
+        return 'In-browser playback needs Spotify Premium.'
+      }
+      if (raw.includes('auth')) {
+        return 'Spotify sign-in expired — hit disconnect, then reconnect.'
+      }
+      if (raw.includes('never became ready') || raw.includes('timeout')) {
+        return 'Timed out starting playback. In Firefox, enable DRM (Settings → search “DRM” → “Play DRM-controlled content”), then try again.'
+      }
+      // initialization_error is almost always EME/DRM being unavailable
+      return 'Your browser blocked DRM playback. In Firefox: Settings → search “DRM” → enable “Play DRM-controlled content”, then try again. Otherwise, play from the Spotify app on another device.'
     }
   }, [])
 
@@ -122,7 +135,7 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
       // surprise Firefox users with a DRM prompt on connect — they can opt in
       // via "play in this browser" instead
       if (isPremiumRef.current && !isIOS() && (await hasEmeSupport())) {
-        if (await startSdk()) return
+        if ((await startSdk()) === null) return // null = SDK started successfully
       }
       setMode('remote')
     } catch {
@@ -139,8 +152,8 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
       return
     }
     setStatusMessage('starting in-browser playback…')
-    const ok = await startSdk()
-    if (!ok) setStatusMessage('Couldn’t start in-browser playback (DRM may be blocked).')
+    const err = await startSdk() // null on success, else a user-facing reason
+    setStatusMessage(err)
   }, [mode, startSdk])
 
   // on mount (StrictMode-safe): finish PKCE redirect, then connect if logged in
